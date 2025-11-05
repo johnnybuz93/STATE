@@ -426,12 +426,26 @@ export default function GlobeCanvas({
   rotationSpeed?: number;
 }) {
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    
+    // Определяем мобильное устройство
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const bgColor = backgroundColor;
+  
+  // Адаптивная позиция камеры: на мобильных дальше
+  const cameraPosition: [number, number, number] = isMobile ? [0, 0, 10] : [0, 0, 7];
 
   if (!mounted) {
     return (
@@ -447,7 +461,7 @@ export default function GlobeCanvas({
   return (
     <div className="w-full h-full" style={{ background: bgColor }}>
       <Canvas
-        camera={{ position: [0, 0, 7], fov: 50 }}
+        camera={{ position: cameraPosition, fov: 50 }}
         gl={{
           alpha: false,
           antialias: true,
