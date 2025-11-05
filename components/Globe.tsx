@@ -530,39 +530,47 @@ function Globe3D({
       {showStats && <Stats />}
 
       {/* VFX Пост-обработка */}
-      {(bloomEnabled || chromaticAberrationEnabled || depthOfFieldEnabled || filmGrainEnabled) && (
-        <EffectComposer multisampling={0}>
-          {bloomEnabled && (
+      {(() => {
+        const effects = [
+          bloomEnabled && (
             <Bloom
+              key="bloom"
               intensity={bloomIntensity}
               luminanceThreshold={0.2}
               luminanceSmoothing={0.9}
               radius={bloomRadius}
               mipmapBlur
             />
-          )}
-          {chromaticAberrationEnabled && (
+          ),
+          chromaticAberrationEnabled && (
             <ChromaticAberration
+              key="chromatic"
               offset={new THREE.Vector2(chromaticAberrationOffset, chromaticAberrationOffset)}
               blendFunction={BlendFunction.NORMAL}
             />
-          )}
-          {depthOfFieldEnabled && (
+          ),
+          depthOfFieldEnabled && (
             <DepthOfField
+              key="dof"
               focusDistance={depthOfFieldFocusDistance}
               focalLength={depthOfFieldFocalLength}
               bokehScale={2}
               height={480}
             />
-          )}
-          {filmGrainEnabled && (
+          ),
+          filmGrainEnabled && (
             <Noise
+              key="noise"
               opacity={filmGrainIntensity}
               blendFunction={BlendFunction.OVERLAY}
             />
-          )}
-        </EffectComposer>
-      )}
+          ),
+        ].filter(Boolean);
+
+        return effects.length > 0 ? (
+          <EffectComposer multisampling={0}>{effects}</EffectComposer>
+        ) : null;
+      })()}
     </>
   );
 }
