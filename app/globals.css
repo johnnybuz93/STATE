@@ -43,33 +43,35 @@ body > div[style*="position: fixed"] canvas {
   opacity: 0.7 !important;
 }
 
-/* Кастомный стильный скроллбар для сайдбара */
+/* Кастомный стильный темный скроллбар для сайдбара */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: hsl(var(--muted-foreground) / 0.7) hsl(var(--muted) / 0.3);
+  scrollbar-color: #3a3a3a #1a1a1a;
+  overflow-y: scroll; /* Всегда показывать вертикальный скроллбар */
 }
 
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
+  -webkit-appearance: none; /* Убираем стандартное поведение WebKit */
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: hsl(var(--muted) / 0.3);
+  background: #1a1a1a;
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.7);
+  background: #3a3a3a;
   border-radius: 4px;
   transition: background 0.2s;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.85);
+  background: #4a4a4a;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:active {
-  background: hsl(var(--muted-foreground) / 1);
+  background: #555555;
 }
 
 @theme inline {

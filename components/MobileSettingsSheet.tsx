@@ -6,18 +6,15 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { SettingsContent } from "./settings/SettingsContent";
-import { SettingsProps } from "@/types/settings";
 
 interface MobileSettingsSheetProps {
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (value: boolean) => void;
-  settingsProps: SettingsProps;
 }
 
 export function MobileSettingsSheet({
   mobileMenuOpen,
   setMobileMenuOpen,
-  settingsProps,
 }: MobileSettingsSheetProps) {
   return (
     <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -45,7 +42,7 @@ export function MobileSettingsSheet({
 
           {/* Контент настроек с прокруткой */}
           <div className="flex-1 overflow-y-auto custom-scrollbar">
-            <SettingsContent {...settingsProps} />
+            <SettingsContent />
           </div>
         </div>
       </SheetContent>

@@ -20,7 +20,7 @@ export function InteractiveEffect({
 }: InteractiveEffectProps) {
   return (
     <div className="space-y-3">
-      <Label className="text-base">Интерактивный разлеташки</Label>
+      <Label className="text-base">Интерактивные разлеташки</Label>
       <RadioGroup
         value={interactiveEffect ? "enabled" : "disabled"}
         onValueChange={(value) => setInteractiveEffect(value === "enabled")}
@@ -102,4 +102,3 @@ export function InteractiveEffect({
     </div>
   );
 }
-

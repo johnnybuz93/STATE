@@ -5,6 +5,8 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stats } from "@react-three/drei";
 import * as THREE from "three";
 import { EarthLayers } from "./EarthLayers";
+import { EffectComposer, Bloom, ChromaticAberration, DepthOfField, Noise } from "@react-three/postprocessing";
+import { BlendFunction } from "postprocessing";
 
 interface GlobePoint {
   position: [number, number, number];
@@ -20,6 +22,10 @@ interface GlobeProps {
   autoRotate?: boolean;
   backgroundColor?: string;
   showStats?: boolean;
+  showPointsLayer?: boolean;
+  showCloudsLayer?: boolean;
+  showEarthLayer?: boolean;
+  showInnerLayer?: boolean;
   interactiveEffect?: boolean;
   effectStrength?: number;
   returnSpeed?: number;
@@ -38,6 +44,17 @@ interface GlobeProps {
   landPointsSize?: number;
   oceanPointsOpacity?: number;
   oceanPointsSize?: number;
+  // VFX эффекты
+  bloomEnabled?: boolean;
+  bloomIntensity?: number;
+  bloomRadius?: number;
+  chromaticAberrationEnabled?: boolean;
+  chromaticAberrationOffset?: number;
+  depthOfFieldEnabled?: boolean;
+  depthOfFieldFocusDistance?: number;
+  depthOfFieldFocalLength?: number;
+  filmGrainEnabled?: boolean;
+  filmGrainIntensity?: number;
 }
 
 interface RawPoint {
@@ -115,7 +132,7 @@ function GlobePoints({
   effectStrength = 4.4,
   returnSpeed = 0.92,
   pointsColor = "#ffffff",
-  landPointsOpacity = 0.8,
+  landPointsOpacity = 0.5,
   landPointsSize = 0.008,
   oceanPointsOpacity = 0.5,
   oceanPointsSize = 0.006,
@@ -276,6 +293,10 @@ function Globe3D({
   autoRotate = true,
   backgroundColor = "#000000",
   showStats = false,
+  showPointsLayer = true,
+  showCloudsLayer = true,
+  showEarthLayer = true,
+  showInnerLayer = true,
   interactiveEffect = false,
   effectStrength = 4.4,
   returnSpeed = 0.92,
@@ -283,17 +304,28 @@ function Globe3D({
   cloudsOpacity = 0.25,
   cloudsSpeed = 3,
   earthOpacity = 1,
-  earthTransparency = 0.5,
+  earthTransparency = 0.1,
   earthMaskIntensity = 1,
   earthTextureIntensity = 1,
   nightLightsColor = "#ffaa44",
   nightLightsIntensity = 1,
   nightLightsBrightness = 3,
   pointsColor = "#ffffff",
-  landPointsOpacity = 0.8,
+  landPointsOpacity = 0.5,
   landPointsSize = 0.008,
   oceanPointsOpacity = 0.5,
   oceanPointsSize = 0.006,
+  // VFX эффекты
+  bloomEnabled = true,
+  bloomIntensity = 1.5,
+  bloomRadius = 0.8,
+  chromaticAberrationEnabled = false,
+  chromaticAberrationOffset = 0.002,
+  depthOfFieldEnabled = false,
+  depthOfFieldFocusDistance = 0,
+  depthOfFieldFocalLength = 0.02,
+  filmGrainEnabled = false,
+  filmGrainIntensity = 0.3,
 }: GlobeProps) {
   const globeRef = useRef<THREE.Group>(null);
   const controlsRef = useRef<any>(null);
@@ -455,27 +487,32 @@ function Globe3D({
         nightLightsColor={nightLightsColor}
         nightLightsIntensity={nightLightsIntensity}
         nightLightsBrightness={nightLightsBrightness}
+        showCloudsLayer={showCloudsLayer}
+        showEarthLayer={showEarthLayer}
+        showInnerLayer={showInnerLayer}
       />
 
       {/* Группа для вращения точек - внешний слой */}
-      <group ref={globeRef}>
-        <GlobePoints
-          points={points}
-          showBackHemisphere={showBackHemisphere}
-          backgroundColor={backgroundColor}
-          globeRotation={rotation || undefined}
-          cameraPosition={cameraPos || undefined}
-          interactiveEffect={interactiveEffect}
-          mouseVelocity={mouseVelocity}
-          effectStrength={effectStrength}
-          returnSpeed={returnSpeed}
-          pointsColor={pointsColor}
-          landPointsOpacity={landPointsOpacity}
-          landPointsSize={landPointsSize}
-          oceanPointsOpacity={oceanPointsOpacity}
-          oceanPointsSize={oceanPointsSize}
-        />
-      </group>
+      {showPointsLayer && (
+        <group ref={globeRef}>
+          <GlobePoints
+            points={points}
+            showBackHemisphere={showBackHemisphere}
+            backgroundColor={backgroundColor}
+            globeRotation={rotation || undefined}
+            cameraPosition={cameraPos || undefined}
+            interactiveEffect={interactiveEffect}
+            mouseVelocity={mouseVelocity}
+            effectStrength={effectStrength}
+            returnSpeed={returnSpeed}
+            pointsColor={pointsColor}
+            landPointsOpacity={landPointsOpacity}
+            landPointsSize={landPointsSize}
+            oceanPointsOpacity={oceanPointsOpacity}
+            oceanPointsSize={oceanPointsSize}
+          />
+        </group>
+      )}
 
       <OrbitControls
         ref={controlsRef}
@@ -491,6 +528,39 @@ function Globe3D({
 
       {/* Статистика FPS */}
       {showStats && <Stats />}
+
+      {/* VFX Пост-обработка */}
+      <EffectComposer multisampling={0} enabled={bloomEnabled || chromaticAberrationEnabled || depthOfFieldEnabled || filmGrainEnabled}>
+        {bloomEnabled && (
+          <Bloom
+            intensity={bloomIntensity}
+            luminanceThreshold={0.2}
+            luminanceSmoothing={0.9}
+            radius={bloomRadius}
+            mipmapBlur
+          />
+        )}
+        {chromaticAberrationEnabled && (
+          <ChromaticAberration
+            offset={new THREE.Vector2(chromaticAberrationOffset, chromaticAberrationOffset)}
+            blendFunction={BlendFunction.NORMAL}
+          />
+        )}
+        {depthOfFieldEnabled && (
+          <DepthOfField
+            focusDistance={depthOfFieldFocusDistance}
+            focalLength={depthOfFieldFocalLength}
+            bokehScale={2}
+            height={480}
+          />
+        )}
+        {filmGrainEnabled && (
+          <Noise
+            opacity={filmGrainIntensity}
+            blendFunction={BlendFunction.OVERLAY}
+          />
+        )}
+      </EffectComposer>
     </>
   );
 }
@@ -500,6 +570,10 @@ export default function GlobeCanvas({
   autoRotate = true,
   backgroundColor = "#000000",
   showStats = false,
+  showPointsLayer = true,
+  showCloudsLayer = true,
+  showEarthLayer = true,
+  showInnerLayer = true,
   interactiveEffect = false,
   effectStrength = 4.4,
   returnSpeed = 0.92,
@@ -507,22 +581,37 @@ export default function GlobeCanvas({
   cloudsOpacity = 0.25,
   cloudsSpeed = 3,
   earthOpacity = 1,
-  earthTransparency = 0.5,
+  earthTransparency = 0.1,
   earthMaskIntensity = 1,
   earthTextureIntensity = 1,
   nightLightsColor = "#ffaa44",
   nightLightsIntensity = 1,
   nightLightsBrightness = 3,
   pointsColor = "#ffffff",
-  landPointsOpacity = 0.8,
+  landPointsOpacity = 0.5,
   landPointsSize = 0.008,
   oceanPointsOpacity = 0.5,
   oceanPointsSize = 0.006,
+  // VFX эффекты
+  bloomEnabled = true,
+  bloomIntensity = 1.5,
+  bloomRadius = 0.8,
+  chromaticAberrationEnabled = false,
+  chromaticAberrationOffset = 0.002,
+  depthOfFieldEnabled = false,
+  depthOfFieldFocusDistance = 0,
+  depthOfFieldFocalLength = 0.02,
+  filmGrainEnabled = false,
+  filmGrainIntensity = 0.3,
 }: {
   showBackHemisphere?: boolean;
   autoRotate?: boolean;
   backgroundColor?: string;
   showStats?: boolean;
+  showPointsLayer?: boolean;
+  showCloudsLayer?: boolean;
+  showEarthLayer?: boolean;
+  showInnerLayer?: boolean;
   interactiveEffect?: boolean;
   effectStrength?: number;
   returnSpeed?: number;
@@ -541,6 +630,17 @@ export default function GlobeCanvas({
   landPointsSize?: number;
   oceanPointsOpacity?: number;
   oceanPointsSize?: number;
+  // VFX эффекты
+  bloomEnabled?: boolean;
+  bloomIntensity?: number;
+  bloomRadius?: number;
+  chromaticAberrationEnabled?: boolean;
+  chromaticAberrationOffset?: number;
+  depthOfFieldEnabled?: boolean;
+  depthOfFieldFocusDistance?: number;
+  depthOfFieldFocalLength?: number;
+  filmGrainEnabled?: boolean;
+  filmGrainIntensity?: number;
 }) {
   const [mounted, setMounted] = useState(false);
 
@@ -593,6 +693,10 @@ export default function GlobeCanvas({
           autoRotate={autoRotate}
           backgroundColor={backgroundColor}
           showStats={showStats}
+          showPointsLayer={showPointsLayer}
+          showCloudsLayer={showCloudsLayer}
+          showEarthLayer={showEarthLayer}
+          showInnerLayer={showInnerLayer}
           interactiveEffect={interactiveEffect}
           effectStrength={effectStrength}
           returnSpeed={returnSpeed}
@@ -611,6 +715,16 @@ export default function GlobeCanvas({
           landPointsSize={landPointsSize}
           oceanPointsOpacity={oceanPointsOpacity}
           oceanPointsSize={oceanPointsSize}
+          bloomEnabled={bloomEnabled}
+          bloomIntensity={bloomIntensity}
+          bloomRadius={bloomRadius}
+          chromaticAberrationEnabled={chromaticAberrationEnabled}
+          chromaticAberrationOffset={chromaticAberrationOffset}
+          depthOfFieldEnabled={depthOfFieldEnabled}
+          depthOfFieldFocusDistance={depthOfFieldFocusDistance}
+          depthOfFieldFocalLength={depthOfFieldFocalLength}
+          filmGrainEnabled={filmGrainEnabled}
+          filmGrainIntensity={filmGrainIntensity}
         />
       </Canvas>
     </div>

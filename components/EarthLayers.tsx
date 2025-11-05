@@ -16,6 +16,9 @@ interface EarthLayersProps {
   nightLightsColor?: string;
   nightLightsIntensity?: number;
   nightLightsBrightness?: number;
+  showCloudsLayer?: boolean;
+  showEarthLayer?: boolean;
+  showInnerLayer?: boolean;
 }
 
 // Слой облаков - вращается быстрее
@@ -61,7 +64,7 @@ function CloudLayer({
 
 // Внутренняя черная сфера для контроля сквозной видимости
 function InnerBlackSphere({ 
-  earthTransparency = 0.5,
+  earthTransparency = 0.1,
 }: { earthTransparency?: number }) {
   // Прозрачность инвертирована: 1 = полностью непрозрачная (не видим сквозь), 0 = полностью прозрачная (видим сквозь)
   const opacity = 1 - earthTransparency;
@@ -174,38 +177,45 @@ export function EarthLayers({
   cloudsOpacity = 0.25,
   cloudsSpeed = 3,
   earthOpacity = 1,
-  earthTransparency = 0.5,
+  earthTransparency = 0.1,
   earthMaskIntensity = 1,
   earthTextureIntensity = 1,
   nightLightsColor = "#ffaa44",
   nightLightsIntensity = 1,
   nightLightsBrightness = 3,
+  showCloudsLayer = true,
+  showEarthLayer = true,
+  showInnerLayer = true,
 }: EarthLayersProps) {
   return (
     <Suspense fallback={null}>
       <group>
         {/* Самый внутренний слой - черная сфера для контроля сквозной видимости */}
-        <InnerBlackSphere earthTransparency={earthTransparency} />
+        {showInnerLayer && <InnerBlackSphere earthTransparency={earthTransparency} />}
         
         {/* Слой земли с текстурами */}
-        <EarthSphere 
-          autoRotate={autoRotate} 
-          rotationSpeed={rotationSpeed}
-          earthOpacity={earthOpacity}
-          earthMaskIntensity={earthMaskIntensity}
-          earthTextureIntensity={earthTextureIntensity}
-          nightLightsColor={nightLightsColor}
-          nightLightsIntensity={nightLightsIntensity}
-          nightLightsBrightness={nightLightsBrightness}
-        />
+        {showEarthLayer && (
+          <EarthSphere 
+            autoRotate={autoRotate} 
+            rotationSpeed={rotationSpeed}
+            earthOpacity={earthOpacity}
+            earthMaskIntensity={earthMaskIntensity}
+            earthTextureIntensity={earthTextureIntensity}
+            nightLightsColor={nightLightsColor}
+            nightLightsIntensity={nightLightsIntensity}
+            nightLightsBrightness={nightLightsBrightness}
+          />
+        )}
         
         {/* Слой облаков (полупрозрачные, вращаются быстрее) */}
-        <CloudLayer 
-          autoRotate={autoRotate} 
-          rotationSpeed={rotationSpeed}
-          cloudsOpacity={cloudsOpacity}
-          cloudsSpeed={cloudsSpeed}
-        />
+        {showCloudsLayer && (
+          <CloudLayer 
+            autoRotate={autoRotate} 
+            rotationSpeed={rotationSpeed}
+            cloudsOpacity={cloudsOpacity}
+            cloudsSpeed={cloudsSpeed}
+          />
+        )}
       </group>
     </Suspense>
   );
