@@ -60,19 +60,21 @@ export default function Home() {
   };
 
   return (
-    <main className="h-screen overflow-hidden flex relative">
+    <main className="h-screen w-screen overflow-hidden flex relative">
       {/* 3D Глобус - основная область */}
-      <div className="flex-1 relative">
-        <GlobeCanvas
-          showBackHemisphere={showBackHemisphere}
-          autoRotate={autoRotate}
-          backgroundColor={backgroundColor}
-          showStats={showStats}
-          interactiveEffect={interactiveEffect}
-          effectStrength={effectStrength}
-          returnSpeed={returnSpeed}
-          rotationSpeed={rotationSpeed}
-        />
+      <div className="flex-1 relative min-w-0">
+        <div className="absolute inset-0 w-full h-full">
+          <GlobeCanvas
+            showBackHemisphere={showBackHemisphere}
+            autoRotate={autoRotate}
+            backgroundColor={backgroundColor}
+            showStats={showStats}
+            interactiveEffect={interactiveEffect}
+            effectStrength={effectStrength}
+            returnSpeed={returnSpeed}
+            rotationSpeed={rotationSpeed}
+          />
+        </div>
 
         {/* Кнопка меню для мобильных - снизу по центру */}
         <MobileSettingsSheet

@@ -273,10 +273,12 @@ function Globe3D({
   rotationSpeed = 0.002,
 }: GlobeProps) {
   const globeRef = useRef<THREE.Group>(null);
+  const controlsRef = useRef<any>(null);
   const [points, setPoints] = useState<GlobePoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [rotation, setRotation] = useState<THREE.Euler | null>(null);
   const [cameraPos, setCameraPos] = useState<THREE.Vector3 | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Отслеживание движения мыши для интерактивного эффекта
   const mousePos = useRef(new THREE.Vector2(0, 0));
@@ -289,8 +291,20 @@ function Globe3D({
       setPoints(loadedPoints);
       setLoading(false);
     });
+  }, []);
 
-    if (!interactiveEffect) return;
+  useEffect(() => {
+    // Определяем мобильное устройство и обновляем при resize
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    if (!interactiveEffect) {
+      return () => window.removeEventListener('resize', checkMobile);
+    }
 
     // Отслеживание свайпа мышью
     const handleMouseDown = () => {
@@ -335,6 +349,7 @@ function Globe3D({
     window.addEventListener("touchmove", handleTouchMove);
 
     return () => {
+      window.removeEventListener('resize', checkMobile);
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
       window.removeEventListener("mousemove", handleMouseMove);
@@ -352,6 +367,31 @@ function Globe3D({
       // Обновляем rotation и позицию камеры для фильтрации точек
       setRotation(globeRef.current.rotation.clone());
       setCameraPos(camera.position.clone());
+    }
+
+    // Адаптивная позиция камеры при изменении размера окна
+    if (controlsRef.current) {
+      const targetDistance = isMobile ? 10 : 7;
+      const currentDistance = camera.position.length();
+      
+      // Плавно изменяем дистанцию камеры, сохраняя направление
+      if (Math.abs(currentDistance - targetDistance) > 0.1) {
+        const direction = camera.position.clone().normalize();
+        const newDistance = currentDistance + (targetDistance - currentDistance) * 0.1;
+        camera.position.copy(direction.multiplyScalar(newDistance));
+        
+        // Обновляем OrbitControls
+        controlsRef.current.update();
+      }
+      
+      // Убедимся, что target OrbitControls всегда в центре
+      if (controlsRef.current.target) {
+        const target = controlsRef.current.target;
+        if (target.x !== 0 || target.y !== 0 || target.z !== 0) {
+          target.set(0, 0, 0);
+          controlsRef.current.update();
+        }
+      }
     }
 
     // Вычисляем velocity мыши для интерактивного эффекта
@@ -393,11 +433,15 @@ function Globe3D({
       </group>
 
       <OrbitControls
+        ref={controlsRef}
         enableZoom={true}
         enablePan={false}
         minDistance={4}
         maxDistance={15}
         autoRotate={false}
+        target={[0, 0, 0]}
+        enableDamping={true}
+        dampingFactor={0.05}
       />
 
       {/* Статистика FPS */}
@@ -426,26 +470,12 @@ export default function GlobeCanvas({
   rotationSpeed?: number;
 }) {
   const [mounted, setMounted] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    
-    // Определяем мобильное устройство
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const bgColor = backgroundColor;
-  
-  // Адаптивная позиция камеры: на мобильных дальше
-  const cameraPosition: [number, number, number] = isMobile ? [0, 0, 10] : [0, 0, 7];
 
   if (!mounted) {
     return (
@@ -459,9 +489,14 @@ export default function GlobeCanvas({
   }
 
   return (
-    <div className="w-full h-full" style={{ background: bgColor }}>
+    <div className="w-full h-full" style={{ background: bgColor, position: 'relative' }}>
       <Canvas
-        camera={{ position: cameraPosition, fov: 50 }}
+        camera={{ position: [0, 0, 7], fov: 50 }}
+        resize={{ 
+          scroll: false, 
+          debounce: { scroll: 50, resize: 50 },
+          offsetSize: true
+        }}
         gl={{
           alpha: false,
           antialias: true,
@@ -475,6 +510,7 @@ export default function GlobeCanvas({
         style={{
           width: "100%",
           height: "100%",
+          display: "block",
           background: bgColor,
         }}
       >
