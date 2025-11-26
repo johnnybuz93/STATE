@@ -19,6 +19,7 @@ interface EarthLayersProps {
   showCloudsLayer?: boolean;
   showEarthLayer?: boolean;
   showInnerLayer?: boolean;
+  baseRotation?: number; // Общий угол вращения для синхронизации
 }
 
 // Слой облаков - вращается быстрее
@@ -27,6 +28,7 @@ function CloudLayer({
   rotationSpeed = 0.002,
   cloudsOpacity = 0.25,
   cloudsSpeed = 3,
+  baseRotation = 0,
 }: EarthLayersProps) {
   const cloudsRef = useRef<THREE.Mesh>(null);
   
@@ -49,8 +51,9 @@ function CloudLayer({
 
   useFrame(() => {
     if (cloudsRef.current && autoRotate) {
+      // Применяем базовое вращение и добавляем дополнительное для облаков
       // Облака вращаются быстрее земли (используем cloudsSpeed как множитель)
-      cloudsRef.current.rotation.y += rotationSpeed * cloudsSpeed;
+      cloudsRef.current.rotation.y = baseRotation * cloudsSpeed;
     }
   });
 
@@ -97,6 +100,7 @@ function EarthSphere({
   nightLightsColor = "#ffaa44",
   nightLightsIntensity = 1,
   nightLightsBrightness = 3,
+  baseRotation = 0,
 }: EarthLayersProps) {
   const earthRef = useRef<THREE.Group>(null);
   
@@ -156,7 +160,8 @@ function EarthSphere({
 
   useFrame(() => {
     if (earthRef.current && autoRotate) {
-      earthRef.current.rotation.y += rotationSpeed;
+      // Применяем базовое вращение для синхронизации
+      earthRef.current.rotation.y = baseRotation;
     }
   });
 
@@ -186,7 +191,20 @@ export function EarthLayers({
   showCloudsLayer = true,
   showEarthLayer = true,
   showInnerLayer = true,
+  baseRotation,
 }: EarthLayersProps) {
+  // Сохраняем состояние вращения для синхронизации (используется только если baseRotation не передан)
+  const baseRotationRef = useRef<number>(0);
+  
+  useFrame(() => {
+    if (autoRotate && baseRotation === undefined) {
+      baseRotationRef.current += rotationSpeed;
+    }
+  });
+
+  // Используем переданный baseRotation, если он есть, иначе внутренний
+  const currentRotation = baseRotation !== undefined ? baseRotation : baseRotationRef.current;
+
   return (
     <Suspense fallback={null}>
       <group>
@@ -204,6 +222,7 @@ export function EarthLayers({
             nightLightsColor={nightLightsColor}
             nightLightsIntensity={nightLightsIntensity}
             nightLightsBrightness={nightLightsBrightness}
+            baseRotation={currentRotation}
           />
         )}
         
@@ -214,6 +233,7 @@ export function EarthLayers({
             rotationSpeed={rotationSpeed}
             cloudsOpacity={cloudsOpacity}
             cloudsSpeed={cloudsSpeed}
+            baseRotation={currentRotation}
           />
         )}
       </group>

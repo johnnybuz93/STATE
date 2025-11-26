@@ -329,6 +329,8 @@ function Globe3D({
 }: GlobeProps) {
   const globeRef = useRef<THREE.Group>(null);
   const controlsRef = useRef<any>(null);
+  // Отдельный ref для отслеживания вращения, который существует всегда
+  const rotationRef = useRef<THREE.Group>(null);
   const [points, setPoints] = useState<GlobePoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [rotation, setRotation] = useState<THREE.Euler | null>(null);
@@ -414,13 +416,25 @@ function Globe3D({
     };
   }, [interactiveEffect]);
 
+  // Сохраняем базовое вращение для синхронизации всех слоев
+  const [baseRotation, setBaseRotation] = useState<number>(0);
+
   useFrame(({ camera }) => {
-    if (globeRef.current) {
+    // Используем rotationRef для отслеживания вращения (он всегда существует)
+    if (rotationRef.current) {
       if (autoRotate) {
-        globeRef.current.rotation.y += rotationSpeed;
+        rotationRef.current.rotation.y += rotationSpeed;
       }
+      // Всегда обновляем базовое вращение для синхронизации
+      setBaseRotation(rotationRef.current.rotation.y);
+      
+      // Синхронизируем globeRef с rotationRef, если он существует
+      if (globeRef.current) {
+        globeRef.current.rotation.y = rotationRef.current.rotation.y;
+      }
+      
       // Обновляем rotation и позицию камеры для фильтрации точек
-      setRotation(globeRef.current.rotation.clone());
+      setRotation(rotationRef.current.rotation.clone());
       setCameraPos(camera.position.clone());
     }
 
@@ -474,6 +488,9 @@ function Globe3D({
       <directionalLight position={[5, 3, 5]} intensity={1.2} />
       <pointLight position={[-5, -3, -5]} intensity={0.4} color="#4488ff" />
 
+      {/* Невидимая группа для отслеживания вращения - всегда существует */}
+      <group ref={rotationRef} visible={false} />
+
       {/* Слои Земли (текстуры + облака) - внутренние слои */}
       <EarthLayers 
         autoRotate={autoRotate} 
@@ -490,6 +507,7 @@ function Globe3D({
         showCloudsLayer={showCloudsLayer}
         showEarthLayer={showEarthLayer}
         showInnerLayer={showInnerLayer}
+        baseRotation={baseRotation}
       />
 
       {/* Группа для вращения точек - внешний слой */}
