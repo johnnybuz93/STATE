@@ -422,7 +422,7 @@ hr.line{border:none;border-top:1px solid var(--border2);margin:12px 0}
 <!-- ════ GAME SCREEN ════ -->
 <div class="screen" id="s-game">
   <div id="globe-area">
-    <iframe id="globe-iframe" src="/globe" scrolling="no" title="Globe"></iframe>
+    <iframe id="globe-iframe" src="/globe" scrolling="no" title="Globe" onload="setTimeout(()=>this.style.opacity='1',1000)"></iframe>
     <div id="hud">
       <div class="hud-left">
         <div class="hud-logo">DIGITAL STATE</div>
