@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 
 import { useRef, useMemo, useEffect, useState, ReactElement } from "react";
@@ -671,27 +672,30 @@ export default function GlobeCanvas({
   filmGrainIntensity?: number;
 }) {
   const [mounted, setMounted] = useState(false);
+const containerRef = useRef<HTMLDivElement>(null);  // ← ДОБАВИТЬ ЭТУ СТРОКУ
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+useEffect(() => {
+  setMounted(true);
+}, []);
 
-  const bgColor = backgroundColor;
+const bgColor = backgroundColor;
 
-  if (!mounted) {
-    return (
-      <div
-        className="w-full h-full flex items-center justify-center"
-        style={{ background: bgColor }}
-      >
-        <div className="text-muted-foreground text-xl">Загрузка глобуса...</div>
-      </div>
-    );
-  }
+if (!mounted) {
+  return (
+    <div
+      className="w-full h-full flex items-center justify-center"
+      style={{ background: bgColor }}
+    >
+      <div className="text-muted-foreground text-xl">Загрузка глобуса...</div>
+    </div>
+  );
+}
 
   return (
-    <div className="w-full h-full" style={{ background: bgColor, position: 'relative' }}>
+     <div ref={containerRef} className="w-full h-full" style={{ background: bgColor, position: 'relative' }}>
       <Canvas
+      // @ts-expect-error
+         eventSource={containerRef}
         camera={{ position: [0, 0, 7], fov: 50 }}
         resize={{ 
           scroll: false, 
