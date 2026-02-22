@@ -92,7 +92,7 @@ const PANEL_W = 360;
 function GlobeArea({ opacity }: { opacity: number }) {
   const settings = useGlobeSettings();
   return (
-    <div style={{position:'absolute',inset:0,opacity,transition:'opacity 0.3s',pointerEvents: opacity > 0.5 ? 'auto' : 'none'}}>
+    <div style={{position:'absolute',inset:0,opacity,transition:'opacity 0.3s'}}>
       <GlobeCanvas {...settings} />
     </div>
   );
@@ -425,7 +425,7 @@ function GameContent() {
       {/* Scanlines */}
       <div style={{position:'fixed',inset:0,zIndex:1,pointerEvents:'none',background:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.02) 2px,rgba(0,0,0,0.02) 4px)'}}/>
       {/* Hide FPS counter */}
-      <style>{`div[style*="position: fixed"][style*="left: 0px"][style*="top: 0px"] { display: none !important; } div[style*="cursor: pointer"][style*="left: 0"] { display: none !important; }`}</style>
+      <style dangerouslySetInnerHTML={{__html:`div[style*="position: fixed"][style*="left: 0px"][style*="top: 0px"] { display: none !important; }`}} />
 
       {/* Globe area */}
       <div style={{position:'relative',flex:1,transition:'margin-right 0.4s cubic-bezier(0.32,0.72,0,1)',marginRight: panelOpen ? PANEL_W : 0,minWidth:0,overflow:'hidden'}}>
