@@ -253,10 +253,11 @@ export default function GlobeCanvas({
     );
   }
 
+const canvasProps: any = { eventSource: containerRef };
   return (
     <div ref={containerRef} className="w-full h-full" style={{ background: backgroundColor, position: 'relative' }}>
-      <Canvas
-        eventSource={containerRef}
+     <Canvas
+  {...canvasProps}
         camera={{ position: [0, 0, 7], fov: 50 }}
         resize={{ scroll: false, debounce: { scroll: 50, resize: 50 }, offsetSize: true }}
         gl={{ alpha: false, antialias: true, powerPreference: "high-performance", stencil: false, depth: true }}
