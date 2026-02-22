@@ -423,7 +423,9 @@ function GameContent() {
   return (
     <div style={{width:'100vw',height:'100vh',overflow:'hidden',background:C.bg,color:C.text,fontFamily:C.ffb,display:'flex',flexDirection:'row',position:'relative'}}>
       {/* Scanlines */}
-      <div style={{position:'fixed',inset:0,zIndex:998,pointerEvents:'none',background:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.02) 2px,rgba(0,0,0,0.02) 4px)'}}/>
+      <div style={{position:'fixed',inset:0,zIndex:1,pointerEvents:'none',background:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.02) 2px,rgba(0,0,0,0.02) 4px)'}}/>
+      {/* Hide FPS counter */}
+      <style>{`div[style*="position: fixed"][style*="left: 0px"][style*="top: 0px"] { display: none !important; } div[style*="cursor: pointer"][style*="left: 0"] { display: none !important; }`}</style>
 
       {/* Globe area */}
       <div style={{position:'relative',flex:1,transition:'margin-right 0.4s cubic-bezier(0.32,0.72,0,1)',marginRight: panelOpen ? PANEL_W : 0,minWidth:0,overflow:'hidden'}}>
@@ -533,8 +535,10 @@ function GameContent() {
         {/* LAYER 3 — Government Room */}
         {currentLayer === 3 && (
           <div style={{position:'absolute',inset:0,zIndex:15,background:'rgba(2,4,10,0.96)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-end',paddingBottom:24}}>
+            {/* Top label */}
+            <div style={{position:'absolute',top:70,left:'50%',transform:'translateX(-50%)',fontFamily:C.ffm,fontSize:9,letterSpacing:4,color:C.text2,textTransform:'uppercase' as const}}>Government Chamber</div>
             <div style={{width:'100%',maxWidth:860,position:'relative'}}>
-              {/* Table */}
+              {/* Table SVG */}
               <div style={{width:'100%',height:140,position:'relative',marginBottom:8,background:'radial-gradient(ellipse 60% 50% at 50% 100%,rgba(184,150,62,0.05) 0%,transparent 70%)'}}>
                 <svg style={{position:'absolute',bottom:0,left:'50%',transform:'translateX(-50%)',opacity:0.2}} width="660" height="110" viewBox="0 0 660 110">
                   <ellipse cx="330" cy="105" rx="300" ry="65" stroke="rgba(184,150,62,0.45)" strokeWidth="1" fill="none"/>
@@ -550,7 +554,7 @@ function GameContent() {
                     onMouseLeave={e => (e.currentTarget.style.transform = 'none')}>
                     {/* Speech bubble */}
                     {activeBubble?.idx === i && (
-                      <div style={{position:'absolute',bottom:'calc(100% + 6px)',left:'50%',transform:'translateX(-50%)',background:'rgba(6,10,18,0.98)',border:`1px solid ${C.border}`,padding:'6px 9px',minWidth:140,maxWidth:200,fontFamily:C.ffm,fontSize:8,color:C.text,lineHeight:1.5,textAlign:'center',zIndex:10,whiteSpace:'normal' as const}}>
+                      <div style={{position:'absolute',bottom:'calc(100% + 6px)',left:'50%',transform:'translateX(-50%)',background:'rgba(6,10,18,0.98)',border:`1px solid ${C.border}`,padding:'6px 9px',minWidth:140,maxWidth:200,fontFamily:C.ffm,fontSize:8,color:C.text,lineHeight:1.5,textAlign:'center' as const,zIndex:10,whiteSpace:'normal' as const}}>
                         {activeBubble.text}
                       </div>
                     )}
@@ -558,14 +562,14 @@ function GameContent() {
                       {a.emoji}
                       <div style={{position:'absolute',bottom:0,left:0,right:0,height:2,background:loyaltyColor(a.loyalty)}}/>
                     </div>
-                    <div style={{fontFamily:C.ffm,fontSize:7,letterSpacing:1,color:C.text2,textAlign:'center',maxWidth:65}}>{a.name.split(' ')[0]}</div>
+                    <div style={{fontFamily:C.ffm,fontSize:7,letterSpacing:1,color:C.text2,textAlign:'center' as const,maxWidth:65}}>{a.name.split(' ')[0]}</div>
                   </div>
                 ))}
               </div>
               {/* Chat messages */}
               <div style={{width:'min(560px,88vw)',margin:'10px auto 0',display:'flex',flexDirection:'column',gap:3,maxHeight:90,overflow:'hidden'}}>
                 {govMessages.map((m, i) => (
-                  <div key={i} style={{fontFamily:C.ffm,fontSize:9,color:C.text3,lineHeight:1.5,textAlign:'center'}}>
+                  <div key={i} style={{fontFamily:C.ffm,fontSize:9,color:C.text3,lineHeight:1.5,textAlign:'center' as const}}>
                     <strong style={{color:C.gold2}}>{m.speaker}:</strong> {m.text}
                   </div>
                 ))}
@@ -584,7 +588,7 @@ function GameContent() {
       </button>
 
       {/* Side panel */}
-      <div style={{position:'fixed',top:0,right:0,width:PANEL_W,height:'100%',background:'rgba(4,6,12,0.99)',borderLeft:`1px solid ${C.border2}`,zIndex:250,display:'flex',flexDirection:'column',transform: panelOpen ? 'translateX(0)' : 'translateX(100%)',transition:'transform 0.4s cubic-bezier(0.32,0.72,0,1)'}}>
+      <div style={{position:'fixed',top:0,right:0,width:PANEL_W,height:'100%',background:'rgba(4,6,12,0.99)',borderLeft:`1px solid ${C.border2}`,zIndex:500,display:'flex',flexDirection:'column',transform: panelOpen ? 'translateX(0)' : 'translateX(100%)',transition:'transform 0.4s cubic-bezier(0.32,0.72,0,1)'}}>
         <div style={{display:'flex',borderBottom:`1px solid ${C.border2}`,flexShrink:0}}>
           <TabBtn id="ops" label="Ops"/>
           <TabBtn id="power" label="Power"/>
