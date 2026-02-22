@@ -228,48 +228,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 const CA_ADDRESS = 'COMING_SOON'; // Replace with real CA when ready
 
 function hideGlobeUI(iframe){
-  try{
-    const doc=iframe.contentDocument||iframe.contentWindow.document;
-    const s=doc.createElement('style');
-    s.textContent=`
-      /* Hide Next.js sidebar */
-      aside { display:none!important; }
-      button[data-slot="sheet-trigger"] { display:none!important; }
-      [id*="toggle"] { display:none!important; }
-
-      /* Hide stats.js FPS counter — appears as fixed div top-left with canvas inside */
-      body > div:not(#__next):not([id]) { display:none!important; }
-      div[style*="cursor: pointer"][style*="left: 0"],
-      div[style*="cursor:pointer"][style*="left:0"],
-      div[style*="position: fixed"][style*="left: 0px"][style*="top: 0px"],
-      div[style*="position:fixed"][style*="left:0"][style*="top:0"] { display:none!important; }
-
-      /* Make sure globe canvas fills full viewport */
-      #__next { width:100vw!important; }
-      main, [role="main"] { width:100vw!important; padding:0!important; }
-    `;
-    doc.head.appendChild(s);
-
-    // Also try to find and remove stats.js DOM element directly
-    setTimeout(()=>{
-      try{
-        // stats.js creates a div with a canvas, positioned top-left
-        doc.querySelectorAll('body > div').forEach(el=>{
-          const st=el.style;
-          if(st.position==='fixed'||st.position==='absolute'){
-            if((st.left==='0px'||st.left==='0')&&(st.top==='0px'||st.top==='0')){
-              el.style.display='none';
-            }
-          }
-          // Also check for canvas children (stats.js pattern)
-          if(el.querySelector('canvas')&&el!==doc.querySelector('#__next')){
-            el.style.display='none';
-          }
-        });
-      }catch(e){}
-    }, 800);
-  }catch(e){}
-  setTimeout(()=>iframe.style.opacity='1', 400);
+  setTimeout(()=>iframe.style.opacity='1', 500);
 }
 
 function copyCA(){
