@@ -92,8 +92,10 @@ const PANEL_W = 360;
 function GlobeArea({ opacity }: { opacity: number }) {
   const settings = useGlobeSettings();
   return (
-    <div style={{position:'absolute',inset:0,opacity,transition:'opacity 0.3s'}}>
-      <GlobeCanvas {...settings} />
+    <div style={{position:'absolute',inset:0,opacity,transition:'opacity 0.3s',pointerEvents:'none'}}>
+      <div style={{width:'100%',height:'100%',pointerEvents:'auto'}}>
+        <GlobeCanvas {...settings} />
+      </div>
     </div>
   );
 }
@@ -588,7 +590,7 @@ function GameContent() {
       </button>
 
       {/* Side panel */}
-      <div style={{position:'fixed',top:0,right:0,width:PANEL_W,height:'100%',background:'rgba(4,6,12,0.99)',borderLeft:`1px solid ${C.border2}`,zIndex:500,display:'flex',flexDirection:'column',transform: panelOpen ? 'translateX(0)' : 'translateX(100%)',transition:'transform 0.4s cubic-bezier(0.32,0.72,0,1)'}}>
+      <div style={{position:'fixed',top:0,right:0,width:PANEL_W,height:'100%',background:'rgba(4,6,12,0.99)',borderLeft:`1px solid ${C.border2}`,zIndex:500,display:'flex',flexDirection:'column',transform: panelOpen ? 'translateX(0)' : 'translateX(100%)',transition:'transform 0.4s cubic-bezier(0.32,0.72,0,1)',isolation:'isolate',pointerEvents:'all'}}>
         <div style={{display:'flex',borderBottom:`1px solid ${C.border2}`,flexShrink:0}}>
           <TabBtn id="ops" label="Ops"/>
           <TabBtn id="power" label="Power"/>
