@@ -809,6 +809,10 @@ function launchGame(){
   GS.president.name=document.getElementById('pname').value||'A. President';
   GS.president.nation=selNation;
   showScreen('s-game');
+  // Перезагрузить iframe ПОСЛЕ того как экран виден
+  const iframe=document.getElementById('globe-iframe');
+  iframe.src='';
+  setTimeout(()=>{ iframe.src='/globe'; },100);
   initGame();
 }
 
