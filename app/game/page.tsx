@@ -378,7 +378,7 @@ function GameContent() {
       <div style={{fontFamily:C.ffm,fontSize:9,letterSpacing:3,color:C.gold,textTransform:'uppercase' as const,marginBottom:36,position:'relative',zIndex:1}}>{voteReason}</div>
       <div style={{display:'flex',gap:14,flexWrap:'wrap' as const,justifyContent:'center',position:'relative',zIndex:1,marginBottom:36}}>
         {voteCards.map((vc, i) => (
-          <div key={i} style={{width:100,display:'flex',flexDirection:'column',alignItems:'center',gap:7,padding:'14px 10px',background:'rgba(255,255,255,0.02)',border:`1px solid ${vc.revealed ? (vc.vote==='for' ? C.green2 : C.red2) : C.border3}`,opacity: vc.revealed ? 1 : 0.3,transition:'all 0.4s',background: vc.revealed ? (vc.vote==='for' ? 'rgba(39,174,96,0.06)' : 'rgba(231,76,60,0.06)') : 'rgba(255,255,255,0.02)' as any}}>
+          <div key={i} style={{width:100,display:'flex',flexDirection:'column',alignItems:'center',gap:7,padding:'14px 10px',background: vc.revealed ? (vc.vote==='for' ? 'rgba(39,174,96,0.06)' : 'rgba(231,76,60,0.06)') : 'rgba(255,255,255,0.02)',border:`1px solid ${vc.revealed ? (vc.vote==='for' ? C.green2 : C.red2) : C.border3}`,opacity: vc.revealed ? 1 : 0.3,transition:'all 0.4s'}}>
             <div style={{fontSize:26}}>{vc.agent.emoji}</div>
             <div style={{fontFamily:C.ffm,fontSize:7,letterSpacing:1,color:C.text2,textAlign:'center'}}>{vc.agent.name}</div>
             <div style={{fontFamily:C.ff,fontSize:9,fontWeight:700,letterSpacing:2,textTransform:'uppercase' as const,color: vc.vote==='for' ? C.green2 : vc.vote==='against' ? C.red2 : C.text2}}>{vc.revealed ? (vc.vote === 'for' ? 'FOR' : 'AGAINST') : '—'}</div>
