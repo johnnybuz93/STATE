@@ -240,8 +240,6 @@ export default function GlobeCanvas({
   showBackHemisphere?: boolean; autoRotate?: boolean; backgroundColor?: string; showStats?: boolean; showPointsLayer?: boolean; showCloudsLayer?: boolean; showEarthLayer?: boolean; showInnerLayer?: boolean; interactiveEffect?: boolean; effectStrength?: number; returnSpeed?: number; rotationSpeed?: number; cloudsOpacity?: number; cloudsSpeed?: number; earthOpacity?: number; earthTransparency?: number; earthMaskIntensity?: number; earthTextureIntensity?: number; nightLightsColor?: string; nightLightsIntensity?: number; nightLightsBrightness?: number; pointsColor?: string; landPointsOpacity?: number; landPointsSize?: number; oceanPointsOpacity?: number; oceanPointsSize?: number; bloomEnabled?: boolean; bloomIntensity?: number; bloomRadius?: number; chromaticAberrationEnabled?: boolean; chromaticAberrationOffset?: number; depthOfFieldEnabled?: boolean; depthOfFieldFocusDistance?: number; depthOfFieldFocalLength?: number; filmGrainEnabled?: boolean; filmGrainIntensity?: number;
 }) {
   const [mounted, setMounted] = useState(false);
-  // ✅ FIX: ограничиваем события Canvas только на контейнере глобуса
-  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -254,7 +252,7 @@ export default function GlobeCanvas({
   }
 
   return (
-    <div ref={containerRef} className="w-full h-full" style={{ background: backgroundColor, position: 'relative' }}>
+    <div className="w-full h-full" style={{ background: backgroundColor, position: 'relative' }}>
       <Canvas
         camera={{ position: [0, 0, 7], fov: 50 }}
         resize={{ scroll: false, debounce: { scroll: 50, resize: 50 }, offsetSize: true }}
@@ -262,9 +260,15 @@ export default function GlobeCanvas({
         dpr={[1, 2]}
         performance={{ min: 0.5 }}
         frameloop="always"
-        style={{ width: "100%", height: "100%", display: "block", background: backgroundColor, pointerEvents: 'none' }}
-        onCreated={({ gl }) => {
+        style={{ width: "100%", height: "100%", display: "block", background: backgroundColor }}
+        onCreated={({ gl, events }) => {
+          // Переключаем события R3F с document на сам canvas элемент
+          // Это главная причина почему кнопки не нажимались
+          events.connect(gl.domElement);
           gl.domElement.style.pointerEvents = 'auto';
+          if (gl.domElement.parentElement) {
+            gl.domElement.parentElement.style.pointerEvents = 'none';
+          }
         }}
       >
         <color attach="background" args={[backgroundColor]} />
