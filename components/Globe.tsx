@@ -158,6 +158,12 @@ function GlobePoints({ points, showBackHemisphere, backgroundColor = "#000000", 
   );
 }
 
+// Controls component that binds to canvas domElement only - fixes click interception
+function Controls({ controlsRef, ...props }: any) {
+  const { gl } = useThree();
+  return <OrbitControls ref={controlsRef} domElement={gl.domElement} {...props} />;
+}
+
 function Globe3D({ showBackHemisphere, autoRotate = true, backgroundColor = "#000000", showStats = false, showPointsLayer = true, showCloudsLayer = true, showEarthLayer = true, showInnerLayer = true, interactiveEffect = false, effectStrength = 4.4, returnSpeed = 0.92, rotationSpeed = 0.002, cloudsOpacity = 0.25, cloudsSpeed = 3, earthOpacity = 1, earthTransparency = 0.1, earthMaskIntensity = 1, earthTextureIntensity = 1, nightLightsColor = "#ffaa44", nightLightsIntensity = 1, nightLightsBrightness = 3, pointsColor = "#ffffff", landPointsOpacity = 0.5, landPointsSize = 0.008, oceanPointsOpacity = 0.5, oceanPointsSize = 0.006, bloomEnabled = true, bloomIntensity = 1.5, bloomRadius = 0.8, chromaticAberrationEnabled = false, chromaticAberrationOffset = 0.002, depthOfFieldEnabled = false, depthOfFieldFocusDistance = 0, depthOfFieldFocalLength = 0.02, filmGrainEnabled = false, filmGrainIntensity = 0.3 }: GlobeProps) {
   const globeRef = useRef<THREE.Group>(null);
   const controlsRef = useRef<any>(null);
@@ -219,7 +225,7 @@ function Globe3D({ showBackHemisphere, autoRotate = true, backgroundColor = "#00
       <group ref={rotationRef} visible={false} />
       <EarthLayers autoRotate={autoRotate} rotationSpeed={rotationSpeed} cloudsOpacity={cloudsOpacity} cloudsSpeed={cloudsSpeed} earthOpacity={earthOpacity} earthTransparency={earthTransparency} earthMaskIntensity={earthMaskIntensity} earthTextureIntensity={earthTextureIntensity} nightLightsColor={nightLightsColor} nightLightsIntensity={nightLightsIntensity} nightLightsBrightness={nightLightsBrightness} showCloudsLayer={showCloudsLayer} showEarthLayer={showEarthLayer} showInnerLayer={showInnerLayer} baseRotation={baseRotation} />
       {showPointsLayer && (<group ref={globeRef}><GlobePoints points={points} showBackHemisphere={showBackHemisphere} backgroundColor={backgroundColor} globeRotation={rotation || undefined} cameraPosition={cameraPos || undefined} interactiveEffect={interactiveEffect} mouseVelocity={mouseVelocity} effectStrength={effectStrength} returnSpeed={returnSpeed} pointsColor={pointsColor} landPointsOpacity={landPointsOpacity} landPointsSize={landPointsSize} oceanPointsOpacity={oceanPointsOpacity} oceanPointsSize={oceanPointsSize} /></group>)}
-      <OrbitControls ref={controlsRef} enableZoom={true} enablePan={false} minDistance={4} maxDistance={15} autoRotate={false} target={[0,0,0]} enableDamping={true} dampingFactor={0.05} domElement={useThree(s => s.gl.domElement)} />
+      <Controls controlsRef={controlsRef} enableZoom={true} enablePan={false} minDistance={4} maxDistance={15} autoRotate={false} target={[0,0,0]} enableDamping={true} dampingFactor={0.05} />
       {showStats && <Stats />}
       {(() => {
         const effects = [
