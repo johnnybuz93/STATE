@@ -94,7 +94,7 @@ function GlobeArea({ opacity }: { opacity: number }) {
   return (
     <div style={{position:'absolute',inset:0,opacity,transition:'opacity 0.3s',pointerEvents:'none'}}>
       <div style={{width:'100%',height:'100%',pointerEvents:'auto'}}>
-        <GlobeCanvas {...settings} />
+        <GlobeCanvas {...settings} interactiveEffect={false} />
       </div>
     </div>
   );

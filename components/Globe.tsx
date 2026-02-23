@@ -246,6 +246,7 @@ export default function GlobeCanvas({
   showBackHemisphere?: boolean; autoRotate?: boolean; backgroundColor?: string; showStats?: boolean; showPointsLayer?: boolean; showCloudsLayer?: boolean; showEarthLayer?: boolean; showInnerLayer?: boolean; interactiveEffect?: boolean; effectStrength?: number; returnSpeed?: number; rotationSpeed?: number; cloudsOpacity?: number; cloudsSpeed?: number; earthOpacity?: number; earthTransparency?: number; earthMaskIntensity?: number; earthTextureIntensity?: number; nightLightsColor?: string; nightLightsIntensity?: number; nightLightsBrightness?: number; pointsColor?: string; landPointsOpacity?: number; landPointsSize?: number; oceanPointsOpacity?: number; oceanPointsSize?: number; bloomEnabled?: boolean; bloomIntensity?: number; bloomRadius?: number; chromaticAberrationEnabled?: boolean; chromaticAberrationOffset?: number; depthOfFieldEnabled?: boolean; depthOfFieldFocusDistance?: number; depthOfFieldFocalLength?: number; filmGrainEnabled?: boolean; filmGrainIntensity?: number;
 }) {
   const [mounted, setMounted] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -258,7 +259,7 @@ export default function GlobeCanvas({
   }
 
   return (
-    <div className="w-full h-full" style={{ background: backgroundColor, position: 'relative', pointerEvents: 'none' }}>
+    <div ref={containerRef} className="w-full h-full" style={{ background: backgroundColor, position: 'relative' }}>
       <Canvas
         camera={{ position: [0, 0, 7], fov: 50 }}
         resize={{ scroll: false, debounce: { scroll: 50, resize: 50 }, offsetSize: true }}
@@ -266,7 +267,8 @@ export default function GlobeCanvas({
         dpr={[1, 2]}
         performance={{ min: 0.5 }}
         frameloop="always"
-        style={{ width: "100%", height: "100%", display: "block", background: backgroundColor, pointerEvents: 'auto' }}
+        eventSource={containerRef as any}
+        style={{ width: "100%", height: "100%", display: "block", background: backgroundColor }}
       >
         <color attach="background" args={[backgroundColor]} />
         <Globe3D showBackHemisphere={showBackHemisphere} autoRotate={autoRotate} backgroundColor={backgroundColor} showStats={showStats} showPointsLayer={showPointsLayer} showCloudsLayer={showCloudsLayer} showEarthLayer={showEarthLayer} showInnerLayer={showInnerLayer} interactiveEffect={interactiveEffect} effectStrength={effectStrength} returnSpeed={returnSpeed} rotationSpeed={rotationSpeed} cloudsOpacity={cloudsOpacity} cloudsSpeed={cloudsSpeed} earthOpacity={earthOpacity} earthTransparency={earthTransparency} earthMaskIntensity={earthMaskIntensity} earthTextureIntensity={earthTextureIntensity} nightLightsColor={nightLightsColor} nightLightsIntensity={nightLightsIntensity} nightLightsBrightness={nightLightsBrightness} pointsColor={pointsColor} landPointsOpacity={landPointsOpacity} landPointsSize={landPointsSize} oceanPointsOpacity={oceanPointsOpacity} oceanPointsSize={oceanPointsSize} bloomEnabled={bloomEnabled} bloomIntensity={bloomIntensity} bloomRadius={bloomRadius} chromaticAberrationEnabled={chromaticAberrationEnabled} chromaticAberrationOffset={chromaticAberrationOffset} depthOfFieldEnabled={depthOfFieldEnabled} depthOfFieldFocusDistance={depthOfFieldFocusDistance} depthOfFieldFocalLength={depthOfFieldFocalLength} filmGrainEnabled={filmGrainEnabled} filmGrainIntensity={filmGrainIntensity} />
