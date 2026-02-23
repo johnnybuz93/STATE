@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useMemo, useEffect, useState, ReactElement } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Stats } from "@react-three/drei";
 import * as THREE from "three";
 import { EarthLayers } from "./EarthLayers";
@@ -219,7 +219,7 @@ function Globe3D({ showBackHemisphere, autoRotate = true, backgroundColor = "#00
       <group ref={rotationRef} visible={false} />
       <EarthLayers autoRotate={autoRotate} rotationSpeed={rotationSpeed} cloudsOpacity={cloudsOpacity} cloudsSpeed={cloudsSpeed} earthOpacity={earthOpacity} earthTransparency={earthTransparency} earthMaskIntensity={earthMaskIntensity} earthTextureIntensity={earthTextureIntensity} nightLightsColor={nightLightsColor} nightLightsIntensity={nightLightsIntensity} nightLightsBrightness={nightLightsBrightness} showCloudsLayer={showCloudsLayer} showEarthLayer={showEarthLayer} showInnerLayer={showInnerLayer} baseRotation={baseRotation} />
       {showPointsLayer && (<group ref={globeRef}><GlobePoints points={points} showBackHemisphere={showBackHemisphere} backgroundColor={backgroundColor} globeRotation={rotation || undefined} cameraPosition={cameraPos || undefined} interactiveEffect={interactiveEffect} mouseVelocity={mouseVelocity} effectStrength={effectStrength} returnSpeed={returnSpeed} pointsColor={pointsColor} landPointsOpacity={landPointsOpacity} landPointsSize={landPointsSize} oceanPointsOpacity={oceanPointsOpacity} oceanPointsSize={oceanPointsSize} /></group>)}
-      <OrbitControls ref={controlsRef} enableZoom={true} enablePan={false} minDistance={4} maxDistance={15} autoRotate={false} target={[0,0,0]} enableDamping={true} dampingFactor={0.05} />
+      <OrbitControls ref={controlsRef} enableZoom={true} enablePan={false} minDistance={4} maxDistance={15} autoRotate={false} target={[0,0,0]} enableDamping={true} dampingFactor={0.05} domElement={useThree(s => s.gl.domElement)} />
       {showStats && <Stats />}
       {(() => {
         const effects = [
