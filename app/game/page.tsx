@@ -93,7 +93,7 @@ function GlobeArea({ opacity }: { opacity: number }) {
   const settings = useGlobeSettings();
   return (
     <div style={{position:'absolute',inset:0,opacity,transition:'opacity 0.3s',pointerEvents:'none'}}>
-      <GlobeCanvas {...settings} interactiveEffect={false} />
+      <GlobeCanvas {...settings} interactiveEffect={false} noEvents={true} />
     </div>
   );
 }
@@ -346,18 +346,6 @@ function GameContent() {
 
   // ── RENDER HELPERS ─────────────────────────────────────────────────────
   const loyaltyColor = (l: string) => l === 'loyal' ? C.green2 : l === 'suspicious' ? C.red2 : C.gold;
-
-  const Btn = ({onClick, children, style}: any) => (
-    <button onClick={onClick} style={{width:'100%',marginBottom:5,padding:'9px 12px',background:'rgba(255,255,255,0.02)',border:`1px solid ${C.border3}`,display:'flex',alignItems:'center',gap:9,color:C.text,fontFamily:C.ffb,fontSize:13,fontWeight:600,cursor:'pointer',textAlign:'left' as const,...style}}>
-      {children}
-    </button>
-  );
-
-  const TabBtn = ({id, label}: {id:string;label:string}) => (
-    <button onClick={() => setActiveTab(id)} style={{flex:1,padding:'11px 4px',fontFamily:C.ffm,fontSize:8,letterSpacing:2,textTransform:'uppercase' as const,color: activeTab===id ? C.gold2 : C.text2,cursor:'pointer',border:'none',background:'transparent',borderBottom: activeTab===id ? `2px solid ${C.gold}` : '2px solid transparent'}}>
-      {label}
-    </button>
-  );
 
   // ── SCREENS ────────────────────────────────────────────────────────────
 
@@ -766,10 +754,12 @@ function GameContent() {
       {/* Side panel */}
       <div style={{position:'fixed',top:0,right:0,width:PANEL_W,height:'100%',background:'rgba(4,6,12,0.99)',borderLeft:`1px solid ${C.border2}`,zIndex:500,display:'flex',flexDirection:'column',transform: panelOpen ? 'translateX(0)' : 'translateX(100%)',transition:'transform 0.4s cubic-bezier(0.32,0.72,0,1)',isolation:'isolate',pointerEvents:'all'}}>
         <div style={{display:'flex',borderBottom:`1px solid ${C.border2}`,flexShrink:0}}>
-          <TabBtn id="ops" label="Ops"/>
-          <TabBtn id="power" label="Power"/>
-          <TabBtn id="agents" label="Agents"/>
-          <TabBtn id="world" label="World"/>
+          {(['ops','power','agents','world'] as const).map(t => (
+            <button key={t} onClick={() => setActiveTab(t)}
+              style={{flex:1,padding:'11px 4px',fontFamily:C.ffm,fontSize:8,letterSpacing:2,textTransform:'uppercase' as const,color: activeTab===t ? C.gold2 : C.text2,cursor:'pointer',border:'none',background:'transparent',borderBottom: activeTab===t ? `2px solid ${C.gold}` : '2px solid transparent'}}>
+              {t}
+            </button>
+          ))}
           <button onClick={() => setScreen('chronicle')} style={{flex:0,padding:'11px 8px',fontFamily:C.ffm,fontSize:10,color:C.text2,cursor:'pointer',border:'none',background:'transparent',borderBottom:'2px solid transparent'}}>📜</button>
         </div>
 
@@ -784,26 +774,26 @@ function GameContent() {
                   <div style={{fontFamily:C.ff,fontSize:16,color:C.gold2,marginBottom:3}}>{targetCountry.flag} {targetCountry.name}</div>
                   <div style={{fontFamily:C.ffm,fontSize:8,color:C.text2,letterSpacing:2,marginBottom:10}}>STABILITY {targetCountry.stability}% · GDP {targetCountry.gdp} · {targetCountry.status.toUpperCase()}</div>
                   {[{t:'spy',icon:'🕵',label:'Deploy Spy',cost:'-150 💰'},{t:'media',icon:'📡',label:'Propaganda',cost:'-80 💰'},{t:'econ',icon:'💹',label:'Economic Pressure',cost:'-200 💰'},{t:'mil',icon:'⚔',label:'Military Threat',cost:'-300 💰'}].map(a => (
-                    <Btn key={a.t} onClick={() => act(a.t)}>
+                    <button key={a.t} onClick={() => act(a.t)} style={{width:'100%',marginBottom:5,padding:'9px 12px',background:'rgba(255,255,255,0.02)',border:`1px solid ${C.border3}`,display:'flex',alignItems:'center',gap:9,color:C.text,fontFamily:C.ffb,fontSize:13,fontWeight:600,cursor:'pointer',textAlign:'left' as const}}>
                       <span style={{fontSize:13,width:16,textAlign:'center'}}>{a.icon}</span>{a.label}
                       <span style={{marginLeft:'auto',fontFamily:C.ffm,fontSize:8,color:C.text2}}>{a.cost}</span>
-                    </Btn>
+                    </button>
                   ))}
                 </div>
               )}
               <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:3,color:C.text2,textTransform:'uppercase' as const,marginBottom:10,paddingBottom:5,borderBottom:`1px solid ${C.border2}`}}>Global Operations</div>
               {[{t:'summit',icon:'🌐',label:'Diplomatic Summit',cost:'-120 💰'},{t:'trade',icon:'🚢',label:'Trade Route Control',cost:'-180 💰'},{t:'hack',icon:'💻',label:'Cyber Offensive',cost:'-90 💰'},{t:'disinfo',icon:'📰',label:'Disinformation Drop',cost:'-60 💰'}].map(a => (
-                <Btn key={a.t} onClick={() => gact(a.t)}>
+                <button key={a.t} onClick={() => gact(a.t)} style={{width:'100%',marginBottom:5,padding:'9px 12px',background:'rgba(255,255,255,0.02)',border:`1px solid ${C.border3}`,display:'flex',alignItems:'center',gap:9,color:C.text,fontFamily:C.ffb,fontSize:13,fontWeight:600,cursor:'pointer',textAlign:'left' as const}}>
                   <span style={{fontSize:13,width:16,textAlign:'center'}}>{a.icon}</span>{a.label}
                   <span style={{marginLeft:'auto',fontFamily:C.ffm,fontSize:8,color:C.text2}}>{a.cost}</span>
-                </Btn>
+                </button>
               ))}
-              <Btn onClick={() => triggerVote('The opposition calls a confidence vote.')} style={{marginTop:8,borderColor:'rgba(231,76,60,0.25)',color:C.red2}}>
+              <button onClick={() => triggerVote('The opposition calls a confidence vote.')} style={{width:'100%',marginTop:8,marginBottom:5,padding:'9px 12px',background:'rgba(255,255,255,0.02)',border:'1px solid rgba(231,76,60,0.25)',display:'flex',alignItems:'center',gap:9,color:C.red2,fontFamily:C.ffb,fontSize:13,fontWeight:600,cursor:'pointer',textAlign:'left' as const}}>
                 <span>🗳</span>Confidence Vote
-              </Btn>
-              <Btn onClick={() => triggerCrisis()} style={{borderColor:'rgba(184,150,62,0.2)',color:C.gold2}}>
+              </button>
+              <button onClick={() => triggerCrisis()} style={{width:'100%',marginBottom:5,padding:'9px 12px',background:'rgba(255,255,255,0.02)',border:`1px solid rgba(184,150,62,0.2)`,display:'flex',alignItems:'center',gap:9,color:C.gold2,fontFamily:C.ffb,fontSize:13,fontWeight:600,cursor:'pointer',textAlign:'left' as const}}>
                 <span>⚡</span>Trigger Crisis [TEST]
-              </Btn>
+              </button>
             </div>
           )}
 
