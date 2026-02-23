@@ -160,9 +160,13 @@ function GameContent() {
 
   // President creation state
   const [presName, setPresName] = useState('');
+  const [presCode, setPresCode] = useState('');
   const [presNation, setPresNation] = useState('');
-  const [presStyle, setPresStyle] = useState('');
-  const [presMethod, setPresMethod] = useState('');
+  const [presBg, setPresBg] = useState('mil');
+  const [presTraits, setPresTraits] = useState<string[]>([]);
+  const [sl1, setSl1] = useState(50);
+  const [sl2, setSl2] = useState(40);
+  const [sl3, setSl3] = useState(60);
 
   useEffect(() => {
     const saved = localStorage.getItem('digital_state_username');
@@ -360,124 +364,159 @@ function GameContent() {
   // ── SCREENS ────────────────────────────────────────────────────────────
 
   // ── CREATE PRESIDENT ───────────────────────────────────────────────────
-  const NATIONS = [
-    {flag:'🇺🇸',name:'United States',bonus:'Military +25',desc:'Global superpower'},
-    {flag:'🇷🇺',name:'Russia',bonus:'Military +20',desc:'Nuclear doctrine'},
-    {flag:'🇨🇳',name:'China',bonus:'Economic +30',desc:'Industrial dominance'},
-    {flag:'🇬🇧',name:'United Kingdom',bonus:'Intel +20',desc:'Shadow networks'},
-    {flag:'🇩🇪',name:'Germany',bonus:'Economic +25',desc:'Industrial engine'},
-    {flag:'🇫🇷',name:'France',bonus:'Narrative +20',desc:'Cultural influence'},
-    {flag:'🇯🇵',name:'Japan',bonus:'Tech +25',desc:'Innovation edge'},
-    {flag:'🇧🇷',name:'Brazil',bonus:'Soft Power +20',desc:'Regional hegemon'},
+  const CNATIONS = [
+    {id:'us',flag:'🇺🇸',name:'United States',bonus:'+25 Military'},
+    {id:'uk',flag:'🇬🇧',name:'United Kingdom',bonus:'+20 Espionage'},
+    {id:'cn',flag:'🇨🇳',name:'China',bonus:'+30 Economic'},
+    {id:'ru',flag:'🇷🇺',name:'Russia',bonus:'+25 Military'},
+    {id:'de',flag:'🇩🇪',name:'Germany',bonus:'+30 Economy'},
+    {id:'fr',flag:'🇫🇷',name:'France',bonus:'+20 Narrative'},
+    {id:'jp',flag:'🇯🇵',name:'Japan',bonus:'+25 Tech'},
+    {id:'br',flag:'🇧🇷',name:'Brazil',bonus:'+20 Soft Power'},
   ];
-  const STYLES = [
-    {id:'auth',label:'Authoritarian',icon:'👁',desc:'Rule through fear and control'},
-    {id:'demo',label:'Democratic',icon:'⚖',desc:'Build coalitions and consensus'},
-    {id:'olig',label:'Oligarchic',icon:'💰',desc:'Govern through wealth and favors'},
-    {id:'theo',label:'Ideological',icon:'📜',desc:'Unite through belief and doctrine'},
+  const CBGS = [
+    {id:'mil',icon:'🎖',name:'Military',bonus:'+25 Military'},
+    {id:'biz',icon:'💼',name:'Business',bonus:'+200 Capital'},
+    {id:'spy',icon:'🕵',name:'Intelligence',bonus:'+20 Espionage'},
+    {id:'acad',icon:'📚',name:'Academic',bonus:'+20 Narrative'},
+    {id:'dip',icon:'🌐',name:'Diplomat',bonus:'+15 All allies'},
+    {id:'med',icon:'📺',name:'Media',bonus:'+25 Soft Power'},
   ];
-  const METHODS = [
-    {id:'mil',label:'Military',icon:'⚔',desc:'Strength as diplomacy'},
-    {id:'eco',label:'Economic',icon:'💹',desc:'Money as leverage'},
-    {id:'esp',label:'Intelligence',icon:'🕵',desc:'Information as power'},
-    {id:'nar',label:'Narrative',icon:'📡',desc:'Truth is what you say'},
+  const CTRAITS = [
+    {id:'char',icon:'✨',name:'Charismatic',desc:'Soft power ×2'},
+    {id:'ruth',icon:'🗡',name:'Ruthless',desc:'Military −50% cost'},
+    {id:'strat',icon:'♟',name:'Strategist',desc:'+1 action/epoch'},
+    {id:'econ2',icon:'📊',name:'Economist',desc:'Treasury +40%'},
+    {id:'spy2',icon:'🔍',name:'Spymaster',desc:'Spy actions ×2'},
+    {id:'orat',icon:'🎤',name:'Orator',desc:'Crises never drain capital'},
+    {id:'par',icon:'👁',name:'Paranoid',desc:'Never betrayed'},
+    {id:'vis',icon:'🌌',name:'Visionary',desc:'Unlock secret events'},
   ];
+
+  // slider tags helper
+  function getSliderTags(sl1:number, sl2:number, sl3:number) {
+    const t1 = sl1<35?'Liberal':sl1>65?'Conservative':'Centrist';
+    const t2 = sl2>60?'Nationalist':sl2<35?'Globalist':'Pragmatist';
+    const t3 = sl3>65?'Hawk':sl3<35?'Dove':'Realist';
+    return [t1, t2, t3];
+  }
 
   if (screen === 'create') return (
     <div style={{width:'100vw',height:'100vh',background:C.bg,color:C.text,fontFamily:C.ffb,display:'flex',overflow:'hidden'}}>
-      {/* Left panel — preview */}
-      <div style={{width:300,flexShrink:0,borderRight:`1px solid ${C.border2}`,display:'flex',flexDirection:'column',background:'rgba(7,10,18,0.98)'}}>
-        <div style={{padding:'28px 24px 20px',borderBottom:`1px solid ${C.border2}`}}>
-          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.gold,marginBottom:6}}>DIGITAL STATE</div>
-          <div style={{fontFamily:C.ff,fontSize:20,fontWeight:700,color:'#fff',letterSpacing:1}}>Create President</div>
+      {/* LEFT */}
+      <div style={{width:280,flexShrink:0,borderRight:`1px solid ${C.border2}`,display:'flex',flexDirection:'column',background:'rgba(7,10,18,0.98)'}}>
+        <div style={{padding:'24px 24px 16px',borderBottom:`1px solid ${C.border2}`}}>
+          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:3,color:C.text2,marginBottom:6}}>Commander Profile</div>
+          <div style={{fontFamily:C.ff,fontSize:20,fontWeight:700,color:'#fff',letterSpacing:1}}>Create Your President</div>
         </div>
-        <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,gap:12}}>
-          <div style={{width:100,height:100,borderRadius:'50%',border:`1px solid ${C.border}`,background:'rgba(184,150,62,0.05)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:44}}>
-            {presNation ? NATIONS.find(n=>n.name===presNation)?.flag : '👤'}
-          </div>
-          <div style={{fontFamily:C.ff,fontSize:17,fontWeight:700,color:'#fff',textAlign:'center',minHeight:24}}>
-            {presName || '— Your Name —'}
-          </div>
-          <div style={{fontFamily:C.ffm,fontSize:9,letterSpacing:2,color:C.gold,textAlign:'center',minHeight:16}}>
+        {/* Preview */}
+        <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,padding:24,background:'radial-gradient(ellipse 80% 60% at 50% 40%,rgba(184,150,62,0.04) 0%,transparent 70%)'}}>
+          <div style={{width:120,height:120,borderRadius:'50%',border:`1px solid ${C.border}`,background:'radial-gradient(circle at 38% 32%,rgba(184,150,62,0.1) 0%,transparent 65%)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:52}}>👑</div>
+          <div style={{fontFamily:C.ff,fontSize:17,fontWeight:700,color:'#fff',textAlign:'center'}}>{presName||'Your Name'}</div>
+          <div style={{fontFamily:C.ffm,fontSize:10,letterSpacing:3,color:C.gold,textAlign:'center'}}>
             {presNation ? presNation.toUpperCase() : '— NO NATION —'}
           </div>
-          {presStyle && <div style={{fontFamily:C.ffm,fontSize:8,color:C.text2,textAlign:'center'}}>{STYLES.find(s=>s.id===presStyle)?.label} · {METHODS.find(m=>m.id===presMethod)?.label||'?'}</div>}
+          <div style={{display:'flex',gap:6,flexWrap:'wrap' as const,justifyContent:'center'}}>
+            {getSliderTags(sl1,sl2,sl3).map(tag=>(
+              <span key={tag} style={{fontFamily:C.ffm,fontSize:8,letterSpacing:1,padding:'2px 7px',border:`1px solid ${C.border2}`,color:C.text2}}>{tag}</span>
+            ))}
+          </div>
         </div>
-        <div style={{padding:'16px 24px',borderTop:`1px solid ${C.border2}`}}>
-          <button
-            disabled={!presName.trim()||!presNation||!presStyle||!presMethod}
-            onClick={startGame}
-            style={{width:'100%',padding:'13px',fontFamily:C.ff,fontSize:11,fontWeight:700,letterSpacing:4,textTransform:'uppercase' as const,cursor: (!presName.trim()||!presNation||!presStyle||!presMethod) ? 'not-allowed' : 'pointer',background: (!presName.trim()||!presNation||!presStyle||!presMethod) ? 'transparent' : C.gold,border:`1px solid ${C.gold}`,color: (!presName.trim()||!presNation||!presStyle||!presMethod) ? C.text2 : C.bg,transition:'all 0.2s'}}>
-            Assume Command →
+        {/* Buttons */}
+        <div style={{padding:'16px 20px',borderTop:`1px solid ${C.border2}`,display:'flex',justifyContent:'space-between',gap:8}}>
+          <button onClick={()=>{localStorage.removeItem('digital_state_username');router.push('/landing');}}
+            style={{padding:'12px 20px',fontFamily:C.ffm,fontSize:8,letterSpacing:2,textTransform:'uppercase' as const,cursor:'pointer',background:'transparent',border:`1px solid ${C.border}`,color:C.text2}}>
+            ← Logout
           </button>
-          {(!presName.trim()||!presNation||!presStyle||!presMethod) && (
-            <div style={{fontFamily:C.ffm,fontSize:8,color:C.text2,textAlign:'center',marginTop:8}}>Complete all fields to continue</div>
-          )}
+          <button onClick={startGame}
+            style={{padding:'12px 28px',fontFamily:C.ff,fontSize:10,fontWeight:600,letterSpacing:3,textTransform:'uppercase' as const,cursor:'pointer',background:C.gold,border:'none',color:C.bg}}>
+            Enter State →
+          </button>
         </div>
       </div>
 
-      {/* Right panel — form */}
-      <div style={{flex:1,overflowY:'auto',padding:'32px 40px'}}>
-        {/* Name */}
-        <div style={{marginBottom:32}}>
-          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.gold,marginBottom:12,textTransform:'uppercase' as const}}>01 — Presidential Identity</div>
-          <input
-            autoFocus
-            maxLength={24}
-            value={presName}
-            onChange={e=>setPresName(e.target.value.toUpperCase())}
-            onKeyDown={e=>{ if(e.key==='Enter' && presName.trim()&&presNation&&presStyle&&presMethod) startGame(); }}
-            placeholder="ENTER PRESIDENT'S NAME"
-            style={{width:'100%',padding:'13px 16px',background:'rgba(255,255,255,0.03)',border:`1px solid ${C.border}`,color:C.gold2,fontFamily:C.ffm,fontSize:15,letterSpacing:3,outline:'none',boxSizing:'border-box' as const,marginBottom:8}}
-          />
-          <div style={{fontFamily:C.ffm,fontSize:8,color:C.text2,letterSpacing:1}}>Your name will be recorded in history.</div>
+      {/* RIGHT — scrollable form */}
+      <div style={{flex:1,overflowY:'auto',padding:'28px 36px'}}>
+        {/* Presidential Identity */}
+        <div style={{marginBottom:28}}>
+          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.text2,textTransform:'uppercase' as const,marginBottom:14,paddingBottom:6,borderBottom:`1px solid ${C.border2}`}}>Presidential Identity</div>
+          <input value={presName} onChange={e=>setPresName(e.target.value)}
+            placeholder="President's full name"
+            style={{width:'100%',padding:'11px 14px',background:'rgba(255,255,255,0.03)',border:`1px solid ${C.border2}`,color:C.text,fontFamily:C.ffb,fontSize:15,outline:'none',marginBottom:10,boxSizing:'border-box' as const}}/>
+          <input value={presCode} onChange={e=>setPresCode(e.target.value)}
+            placeholder='Codename (e.g. "THE ARCHITECT")'
+            style={{width:'100%',padding:'11px 14px',background:'rgba(255,255,255,0.03)',border:`1px solid ${C.border2}`,color:C.text,fontFamily:C.ffb,fontSize:15,outline:'none',boxSizing:'border-box' as const}}/>
         </div>
 
         {/* Nation */}
-        <div style={{marginBottom:32}}>
-          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.gold,marginBottom:12,textTransform:'uppercase' as const}}>02 — Choose Your Nation</div>
+        <div style={{marginBottom:28}}>
+          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.text2,textTransform:'uppercase' as const,marginBottom:14,paddingBottom:6,borderBottom:`1px solid ${C.border2}`}}>Choose Your Nation</div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-            {NATIONS.map(n=>(
-              <div key={n.name} onClick={()=>setPresNation(n.name)}
-                style={{padding:'12px 14px',background: presNation===n.name ? 'rgba(184,150,62,0.1)' : 'rgba(255,255,255,0.02)',border:`1px solid ${presNation===n.name ? C.gold : C.border3}`,cursor:'pointer',display:'flex',alignItems:'center',gap:10,transition:'all 0.15s'}}>
-                <span style={{fontSize:20}}>{n.flag}</span>
-                <div>
-                  <div style={{fontFamily:C.ffb,fontSize:12,fontWeight:600,color: presNation===n.name ? C.gold2 : C.text}}>{n.name}</div>
-                  <div style={{fontFamily:C.ffm,fontSize:8,color: presNation===n.name ? C.gold : C.text2,marginTop:1}}>{n.bonus}</div>
+            {CNATIONS.map(n=>(
+              <div key={n.id} onClick={()=>setPresNation(n.name)}
+                style={{padding:'12px 10px',background: presNation===n.name ? 'rgba(184,150,62,0.08)' : 'rgba(255,255,255,0.02)',border:`1px solid ${presNation===n.name ? C.gold : C.border3}`,cursor:'pointer',textAlign:'center' as const,transition:'all 0.15s'}}>
+                <div style={{fontSize:18,marginBottom:4}}>{n.flag}</div>
+                <div style={{fontFamily:C.ffb,fontSize:12,fontWeight:600,color: presNation===n.name ? C.gold2 : C.text}}>{n.name}</div>
+                <div style={{fontFamily:C.ffm,fontSize:9,color:C.text2,marginTop:2}}>{n.bonus}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Background */}
+        <div style={{marginBottom:28}}>
+          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.text2,textTransform:'uppercase' as const,marginBottom:14,paddingBottom:6,borderBottom:`1px solid ${C.border2}`}}>Background · Starting Bonus</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
+            {CBGS.map(b=>(
+              <div key={b.id} onClick={()=>setPresBg(b.id)}
+                style={{padding:'14px 10px',background: presBg===b.id ? 'rgba(184,150,62,0.08)' : 'rgba(255,255,255,0.02)',border:`1px solid ${presBg===b.id ? C.gold : C.border3}`,cursor:'pointer',textAlign:'center' as const,transition:'all 0.15s',position:'relative' as const}}>
+                {presBg===b.id && <div style={{position:'absolute' as const,top:4,right:6,fontSize:9,color:C.gold}}>✓</div>}
+                <div style={{fontSize:20,marginBottom:6}}>{b.icon}</div>
+                <div style={{fontFamily:C.ffb,fontSize:12,fontWeight:600,color: presBg===b.id ? C.gold2 : C.text,marginBottom:3}}>{b.name}</div>
+                <div style={{fontFamily:C.ffm,fontSize:8,color:C.text2}}>{b.bonus}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Core Traits */}
+        <div style={{marginBottom:28}}>
+          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.text2,textTransform:'uppercase' as const,marginBottom:14,paddingBottom:6,borderBottom:`1px solid ${C.border2}`}}>Core Traits · Max 2</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+            {CTRAITS.map(t=>{
+              const sel = presTraits.includes(t.id);
+              return (
+                <div key={t.id} onClick={()=>{
+                  if(sel) setPresTraits(prev=>prev.filter(x=>x!==t.id));
+                  else if(presTraits.length<2) setPresTraits(prev=>[...prev,t.id]);
+                }}
+                  style={{padding:'12px 10px',background: sel ? 'rgba(184,150,62,0.08)' : 'rgba(255,255,255,0.02)',border:`1px solid ${sel ? C.gold : C.border3}`,cursor: (!sel&&presTraits.length>=2)?'not-allowed':'pointer',textAlign:'center' as const,transition:'all 0.15s',opacity:(!sel&&presTraits.length>=2)?0.4:1}}>
+                  <div style={{fontSize:18,marginBottom:4}}>{t.icon}</div>
+                  <div style={{fontFamily:C.ffb,fontSize:12,fontWeight:600,color: sel ? C.gold2 : C.text,marginBottom:2}}>{t.name}</div>
+                  <div style={{fontFamily:C.ffm,fontSize:8,color:C.text2}}>{t.desc}</div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Governing style */}
-        <div style={{marginBottom:32}}>
-          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.gold,marginBottom:12,textTransform:'uppercase' as const}}>03 — Governing Character</div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-            {STYLES.map(s=>(
-              <div key={s.id} onClick={()=>setPresStyle(s.id)}
-                style={{padding:'14px',background: presStyle===s.id ? 'rgba(184,150,62,0.1)' : 'rgba(255,255,255,0.02)',border:`1px solid ${presStyle===s.id ? C.gold : C.border3}`,cursor:'pointer',transition:'all 0.15s'}}>
-                <div style={{fontSize:18,marginBottom:6}}>{s.icon}</div>
-                <div style={{fontFamily:C.ffb,fontSize:13,fontWeight:700,color: presStyle===s.id ? C.gold2 : C.text,marginBottom:3}}>{s.label}</div>
-                <div style={{fontFamily:C.ffm,fontSize:8,color:C.text2,lineHeight:1.4}}>{s.desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Primary method */}
+        {/* Political Spectrum */}
         <div style={{marginBottom:40}}>
-          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.gold,marginBottom:12,textTransform:'uppercase' as const}}>04 — Primary Method of Rule</div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-            {METHODS.map(m=>(
-              <div key={m.id} onClick={()=>setPresMethod(m.id)}
-                style={{padding:'14px',background: presMethod===m.id ? 'rgba(184,150,62,0.1)' : 'rgba(255,255,255,0.02)',border:`1px solid ${presMethod===m.id ? C.gold : C.border3}`,cursor:'pointer',transition:'all 0.15s'}}>
-                <div style={{fontSize:18,marginBottom:6}}>{m.icon}</div>
-                <div style={{fontFamily:C.ffb,fontSize:13,fontWeight:700,color: presMethod===m.id ? C.gold2 : C.text,marginBottom:3}}>{m.label}</div>
-                <div style={{fontFamily:C.ffm,fontSize:8,color:C.text2,lineHeight:1.4}}>{m.desc}</div>
+          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.text2,textTransform:'uppercase' as const,marginBottom:14,paddingBottom:6,borderBottom:`1px solid ${C.border2}`}}>Political Spectrum</div>
+          {[
+            {label1:'Liberal',label2:'Conservative',val:sl1,set:(v:number)=>setSl1(v)},
+            {label1:'Globalist',label2:'Nationalist',val:sl2,set:(v:number)=>setSl2(v)},
+            {label1:'Diplomat',label2:'Hawk',val:sl3,set:(v:number)=>setSl3(v)},
+          ].map(({label1,label2,val,set})=>(
+            <div key={label1} style={{marginBottom:18}}>
+              <div style={{display:'flex',justifyContent:'space-between',fontFamily:C.ffm,fontSize:9,color:C.text2,marginBottom:7}}>
+                <span>{label1}</span><span>{label2}</span>
               </div>
-            ))}
-          </div>
+              <input type="range" min={0} max={100} value={val}
+                onChange={e=>set(Number(e.target.value))}
+                style={{width:'100%',WebkitAppearance:'none' as any,appearance:'none' as any,height:2,background:`linear-gradient(to right, ${C.gold} ${val}%, rgba(184,150,62,0.15) ${val}%)`,outline:'none',cursor:'pointer'}}/>
+            </div>
+          ))}
         </div>
       </div>
     </div>
