@@ -259,7 +259,7 @@ export default function GlobeCanvas({
   }
 
   return (
-    <div ref={containerRef} className="w-full h-full" style={{ background: backgroundColor, position: 'relative' }}>
+    <div ref={containerRef} className="w-full h-full" style={{ background: backgroundColor, position: 'relative', pointerEvents: 'none' }}>
       <Canvas
         camera={{ position: [0, 0, 7], fov: 50 }}
         resize={{ scroll: false, debounce: { scroll: 50, resize: 50 }, offsetSize: true }}
@@ -267,8 +267,7 @@ export default function GlobeCanvas({
         dpr={[1, 2]}
         performance={{ min: 0.5 }}
         frameloop="always"
-        eventSource={containerRef as any}
-        style={{ width: "100%", height: "100%", display: "block", background: backgroundColor }}
+        style={{ width: "100%", height: "100%", display: "block", background: backgroundColor, pointerEvents: 'none' }}
       >
         <color attach="background" args={[backgroundColor]} />
         <Globe3D showBackHemisphere={showBackHemisphere} autoRotate={autoRotate} backgroundColor={backgroundColor} showStats={showStats} showPointsLayer={showPointsLayer} showCloudsLayer={showCloudsLayer} showEarthLayer={showEarthLayer} showInnerLayer={showInnerLayer} interactiveEffect={interactiveEffect} effectStrength={effectStrength} returnSpeed={returnSpeed} rotationSpeed={rotationSpeed} cloudsOpacity={cloudsOpacity} cloudsSpeed={cloudsSpeed} earthOpacity={earthOpacity} earthTransparency={earthTransparency} earthMaskIntensity={earthMaskIntensity} earthTextureIntensity={earthTextureIntensity} nightLightsColor={nightLightsColor} nightLightsIntensity={nightLightsIntensity} nightLightsBrightness={nightLightsBrightness} pointsColor={pointsColor} landPointsOpacity={landPointsOpacity} landPointsSize={landPointsSize} oceanPointsOpacity={oceanPointsOpacity} oceanPointsSize={oceanPointsSize} bloomEnabled={bloomEnabled} bloomIntensity={bloomIntensity} bloomRadius={bloomRadius} chromaticAberrationEnabled={chromaticAberrationEnabled} chromaticAberrationOffset={chromaticAberrationOffset} depthOfFieldEnabled={depthOfFieldEnabled} depthOfFieldFocusDistance={depthOfFieldFocusDistance} depthOfFieldFocalLength={depthOfFieldFocalLength} filmGrainEnabled={filmGrainEnabled} filmGrainIntensity={filmGrainIntensity} />
