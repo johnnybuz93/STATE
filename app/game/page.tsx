@@ -104,7 +104,7 @@ function GlobeArea({ opacity }: { opacity: number }) {
 function GameContent() {
   const router = useRouter();
   const [username, setUsername] = useState('COMMANDER');
-  const [screen, setScreen] = useState<'game'|'cinematic'|'vote'|'chronicle'>('game');
+  const [screen, setScreen] = useState<'create'|'game'|'cinematic'|'vote'|'chronicle'>('create');
   const [panelOpen, setPanelOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('ops');
   const [currentLayer, setCurrentLayer] = useState(1);
