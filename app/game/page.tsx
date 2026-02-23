@@ -92,8 +92,10 @@ const PANEL_W = 360;
 function GlobeArea({ opacity }: { opacity: number }) {
   const settings = useGlobeSettings();
   return (
-    <div style={{position:'absolute',inset:0,opacity,transition:'opacity 0.3s'}}>
-      <GlobeCanvas {...settings} interactiveEffect={false} />
+    <div style={{position:'absolute',inset:0,opacity,transition:'opacity 0.3s',pointerEvents:'none'}}>
+      <div style={{width:'100%',height:'100%',pointerEvents:'auto'}}>
+        <GlobeCanvas {...settings} />
+      </div>
     </div>
   );
 }
@@ -156,10 +158,16 @@ function GameContent() {
 
   useEffect(() => { epochRef.current = epoch; }, [epoch]);
 
+  // President creation state
+  const [presName, setPresName] = useState('');
+  const [presNation, setPresNation] = useState('');
+  const [presStyle, setPresStyle] = useState('');
+  const [presMethod, setPresMethod] = useState('');
+
   useEffect(() => {
     const saved = localStorage.getItem('digital_state_username');
     if (saved) setUsername(saved);
-    // always show create screen — user must confirm name
+    // Always show create screen first
   }, []);
 
   // Gov room chat
@@ -320,11 +328,8 @@ function GameContent() {
     });
   }
 
-  // ── RENDER HELPERS ─────────────────────────────────────────────────────
-  const loyaltyColor = (l: string) => l === 'loyal' ? C.green2 : l === 'suspicious' ? C.red2 : C.gold;
-
   function startGame() {
-    const name = username.trim() || 'COMMANDER';
+    const name = (presName || username || 'COMMANDER').trim();
     localStorage.setItem('digital_state_username', name);
     setUsername(name);
     setScreen('game');
@@ -336,6 +341,9 @@ function GameContent() {
       startLoop();
     }
   }
+
+  // ── RENDER HELPERS ─────────────────────────────────────────────────────
+  const loyaltyColor = (l: string) => l === 'loyal' ? C.green2 : l === 'suspicious' ? C.red2 : C.gold;
 
   const Btn = ({onClick, children, style}: any) => (
     <button onClick={onClick} style={{width:'100%',marginBottom:5,padding:'9px 12px',background:'rgba(255,255,255,0.02)',border:`1px solid ${C.border3}`,display:'flex',alignItems:'center',gap:9,color:C.text,fontFamily:C.ffb,fontSize:13,fontWeight:600,cursor:'pointer',textAlign:'left' as const,...style}}>
@@ -351,31 +359,126 @@ function GameContent() {
 
   // ── SCREENS ────────────────────────────────────────────────────────────
 
-  // CREATE PRESIDENT
+  // ── CREATE PRESIDENT ───────────────────────────────────────────────────
+  const NATIONS = [
+    {flag:'🇺🇸',name:'United States',bonus:'Military +25',desc:'Global superpower'},
+    {flag:'🇷🇺',name:'Russia',bonus:'Military +20',desc:'Nuclear doctrine'},
+    {flag:'🇨🇳',name:'China',bonus:'Economic +30',desc:'Industrial dominance'},
+    {flag:'🇬🇧',name:'United Kingdom',bonus:'Intel +20',desc:'Shadow networks'},
+    {flag:'🇩🇪',name:'Germany',bonus:'Economic +25',desc:'Industrial engine'},
+    {flag:'🇫🇷',name:'France',bonus:'Narrative +20',desc:'Cultural influence'},
+    {flag:'🇯🇵',name:'Japan',bonus:'Tech +25',desc:'Innovation edge'},
+    {flag:'🇧🇷',name:'Brazil',bonus:'Soft Power +20',desc:'Regional hegemon'},
+  ];
+  const STYLES = [
+    {id:'auth',label:'Authoritarian',icon:'👁',desc:'Rule through fear and control'},
+    {id:'demo',label:'Democratic',icon:'⚖',desc:'Build coalitions and consensus'},
+    {id:'olig',label:'Oligarchic',icon:'💰',desc:'Govern through wealth and favors'},
+    {id:'theo',label:'Ideological',icon:'📜',desc:'Unite through belief and doctrine'},
+  ];
+  const METHODS = [
+    {id:'mil',label:'Military',icon:'⚔',desc:'Strength as diplomacy'},
+    {id:'eco',label:'Economic',icon:'💹',desc:'Money as leverage'},
+    {id:'esp',label:'Intelligence',icon:'🕵',desc:'Information as power'},
+    {id:'nar',label:'Narrative',icon:'📡',desc:'Truth is what you say'},
+  ];
+
   if (screen === 'create') return (
-    <div style={{width:'100vw',height:'100vh',background:C.bg,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
-      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse 60% 50% at 50% 40%,rgba(184,150,62,0.06) 0%,transparent 70%)',pointerEvents:'none'}}/>
-      <div style={{position:'absolute',inset:0,pointerEvents:'none',background:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.03) 3px,rgba(0,0,0,0.03) 4px)'}}/>
-      <div style={{position:'relative',zIndex:1,textAlign:'center',maxWidth:480,padding:'0 40px',width:'100%'}}>
-        <div style={{fontFamily:C.ffm,fontSize:9,letterSpacing:6,color:C.gold,textTransform:'uppercase' as const,marginBottom:16}}>Digital State · Character Creation</div>
-        <h1 style={{fontFamily:C.ff,fontSize:'clamp(28px,6vw,52px)',fontWeight:900,letterSpacing:4,color:'#fff',textTransform:'uppercase' as const,lineHeight:1,marginBottom:8}}>Create Your President</h1>
-        <div style={{fontFamily:C.ffm,fontSize:10,color:C.text3,letterSpacing:2,marginBottom:48}}>You will command nations. Choose your name carefully.</div>
-        <div style={{marginBottom:24}}>
-          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:3,color:C.text2,marginBottom:8,textAlign:'left' as const}}>COMMANDER DESIGNATION</div>
+    <div style={{width:'100vw',height:'100vh',background:C.bg,color:C.text,fontFamily:C.ffb,display:'flex',overflow:'hidden'}}>
+      {/* Left panel — preview */}
+      <div style={{width:300,flexShrink:0,borderRight:`1px solid ${C.border2}`,display:'flex',flexDirection:'column',background:'rgba(7,10,18,0.98)'}}>
+        <div style={{padding:'28px 24px 20px',borderBottom:`1px solid ${C.border2}`}}>
+          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.gold,marginBottom:6}}>DIGITAL STATE</div>
+          <div style={{fontFamily:C.ff,fontSize:20,fontWeight:700,color:'#fff',letterSpacing:1}}>Create President</div>
+        </div>
+        <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,gap:12}}>
+          <div style={{width:100,height:100,borderRadius:'50%',border:`1px solid ${C.border}`,background:'rgba(184,150,62,0.05)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:44}}>
+            {presNation ? NATIONS.find(n=>n.name===presNation)?.flag : '👤'}
+          </div>
+          <div style={{fontFamily:C.ff,fontSize:17,fontWeight:700,color:'#fff',textAlign:'center',minHeight:24}}>
+            {presName || '— Your Name —'}
+          </div>
+          <div style={{fontFamily:C.ffm,fontSize:9,letterSpacing:2,color:C.gold,textAlign:'center',minHeight:16}}>
+            {presNation ? presNation.toUpperCase() : '— NO NATION —'}
+          </div>
+          {presStyle && <div style={{fontFamily:C.ffm,fontSize:8,color:C.text2,textAlign:'center'}}>{STYLES.find(s=>s.id===presStyle)?.label} · {METHODS.find(m=>m.id===presMethod)?.label||'?'}</div>}
+        </div>
+        <div style={{padding:'16px 24px',borderTop:`1px solid ${C.border2}`}}>
+          <button
+            disabled={!presName.trim()||!presNation||!presStyle||!presMethod}
+            onClick={startGame}
+            style={{width:'100%',padding:'13px',fontFamily:C.ff,fontSize:11,fontWeight:700,letterSpacing:4,textTransform:'uppercase' as const,cursor: (!presName.trim()||!presNation||!presStyle||!presMethod) ? 'not-allowed' : 'pointer',background: (!presName.trim()||!presNation||!presStyle||!presMethod) ? 'transparent' : C.gold,border:`1px solid ${C.gold}`,color: (!presName.trim()||!presNation||!presStyle||!presMethod) ? C.text2 : C.bg,transition:'all 0.2s'}}>
+            Assume Command →
+          </button>
+          {(!presName.trim()||!presNation||!presStyle||!presMethod) && (
+            <div style={{fontFamily:C.ffm,fontSize:8,color:C.text2,textAlign:'center',marginTop:8}}>Complete all fields to continue</div>
+          )}
+        </div>
+      </div>
+
+      {/* Right panel — form */}
+      <div style={{flex:1,overflowY:'auto',padding:'32px 40px'}}>
+        {/* Name */}
+        <div style={{marginBottom:32}}>
+          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.gold,marginBottom:12,textTransform:'uppercase' as const}}>01 — Presidential Identity</div>
           <input
             autoFocus
-            maxLength={20}
-            value={username === 'COMMANDER' ? '' : username}
-            onChange={e => setUsername(e.target.value.toUpperCase())}
-            onKeyDown={e => { if (e.key === 'Enter') startGame(); }}
-            style={{width:'100%',padding:'14px 16px',fontFamily:C.ffm,fontSize:16,letterSpacing:4,color:C.gold2,background:'rgba(184,150,62,0.04)',border:`1px solid ${C.border}`,outline:'none',textAlign:'center' as const,boxSizing:'border-box' as const}}
-            placeholder="ENTER NAME"
+            maxLength={24}
+            value={presName}
+            onChange={e=>setPresName(e.target.value.toUpperCase())}
+            onKeyDown={e=>{ if(e.key==='Enter' && presName.trim()&&presNation&&presStyle&&presMethod) startGame(); }}
+            placeholder="ENTER PRESIDENT'S NAME"
+            style={{width:'100%',padding:'13px 16px',background:'rgba(255,255,255,0.03)',border:`1px solid ${C.border}`,color:C.gold2,fontFamily:C.ffm,fontSize:15,letterSpacing:3,outline:'none',boxSizing:'border-box' as const,marginBottom:8}}
           />
+          <div style={{fontFamily:C.ffm,fontSize:8,color:C.text2,letterSpacing:1}}>Your name will be recorded in history.</div>
         </div>
-        <button onClick={startGame}
-          style={{width:'100%',padding:'15px',fontFamily:C.ff,fontSize:12,fontWeight:700,letterSpacing:5,textTransform:'uppercase' as const,cursor:'pointer',border:`1px solid ${C.gold}`,color:C.gold2,background:'rgba(184,150,62,0.06)'}}>
-          Assume Command →
-        </button>
+
+        {/* Nation */}
+        <div style={{marginBottom:32}}>
+          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.gold,marginBottom:12,textTransform:'uppercase' as const}}>02 — Choose Your Nation</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+            {NATIONS.map(n=>(
+              <div key={n.name} onClick={()=>setPresNation(n.name)}
+                style={{padding:'12px 14px',background: presNation===n.name ? 'rgba(184,150,62,0.1)' : 'rgba(255,255,255,0.02)',border:`1px solid ${presNation===n.name ? C.gold : C.border3}`,cursor:'pointer',display:'flex',alignItems:'center',gap:10,transition:'all 0.15s'}}>
+                <span style={{fontSize:20}}>{n.flag}</span>
+                <div>
+                  <div style={{fontFamily:C.ffb,fontSize:12,fontWeight:600,color: presNation===n.name ? C.gold2 : C.text}}>{n.name}</div>
+                  <div style={{fontFamily:C.ffm,fontSize:8,color: presNation===n.name ? C.gold : C.text2,marginTop:1}}>{n.bonus}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Governing style */}
+        <div style={{marginBottom:32}}>
+          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.gold,marginBottom:12,textTransform:'uppercase' as const}}>03 — Governing Character</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+            {STYLES.map(s=>(
+              <div key={s.id} onClick={()=>setPresStyle(s.id)}
+                style={{padding:'14px',background: presStyle===s.id ? 'rgba(184,150,62,0.1)' : 'rgba(255,255,255,0.02)',border:`1px solid ${presStyle===s.id ? C.gold : C.border3}`,cursor:'pointer',transition:'all 0.15s'}}>
+                <div style={{fontSize:18,marginBottom:6}}>{s.icon}</div>
+                <div style={{fontFamily:C.ffb,fontSize:13,fontWeight:700,color: presStyle===s.id ? C.gold2 : C.text,marginBottom:3}}>{s.label}</div>
+                <div style={{fontFamily:C.ffm,fontSize:8,color:C.text2,lineHeight:1.4}}>{s.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Primary method */}
+        <div style={{marginBottom:40}}>
+          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:4,color:C.gold,marginBottom:12,textTransform:'uppercase' as const}}>04 — Primary Method of Rule</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+            {METHODS.map(m=>(
+              <div key={m.id} onClick={()=>setPresMethod(m.id)}
+                style={{padding:'14px',background: presMethod===m.id ? 'rgba(184,150,62,0.1)' : 'rgba(255,255,255,0.02)',border:`1px solid ${presMethod===m.id ? C.gold : C.border3}`,cursor:'pointer',transition:'all 0.15s'}}>
+                <div style={{fontSize:18,marginBottom:6}}>{m.icon}</div>
+                <div style={{fontFamily:C.ffb,fontSize:13,fontWeight:700,color: presMethod===m.id ? C.gold2 : C.text,marginBottom:3}}>{m.label}</div>
+                <div style={{fontFamily:C.ffm,fontSize:8,color:C.text2,lineHeight:1.4}}>{m.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
