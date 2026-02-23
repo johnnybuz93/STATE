@@ -92,10 +92,8 @@ const PANEL_W = 360;
 function GlobeArea({ opacity }: { opacity: number }) {
   const settings = useGlobeSettings();
   return (
-    <div style={{position:'absolute',inset:0,opacity,transition:'opacity 0.3s',pointerEvents:'none'}}>
-      <div style={{width:'100%',height:'100%',pointerEvents:'auto'}}>
-        <GlobeCanvas {...settings} />
-      </div>
+    <div style={{position:'absolute',inset:0,opacity,transition:'opacity 0.3s'}}>
+      <GlobeCanvas {...settings} interactiveEffect={false} />
     </div>
   );
 }
@@ -104,7 +102,7 @@ function GlobeArea({ opacity }: { opacity: number }) {
 function GameContent() {
   const router = useRouter();
   const [username, setUsername] = useState('COMMANDER');
-  const [screen, setScreen] = useState<'game'|'cinematic'|'vote'|'chronicle'>('game');
+  const [screen, setScreen] = useState<'create'|'game'|'cinematic'|'vote'|'chronicle'>('create');
   const [panelOpen, setPanelOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('ops');
   const [currentLayer, setCurrentLayer] = useState(1);
@@ -160,15 +158,18 @@ function GameContent() {
 
   useEffect(() => {
     const saved = localStorage.getItem('digital_state_username');
-    if (!saved) { router.push('/landing'); return; }
-    setUsername(saved);
-    if (!gameStartedRef.current) {
-      gameStartedRef.current = true;
-      addEvt('Command channel open. The world awaits your move.', 'green');
-      addEvt('Intelligence reports incoming from 3 continents.', '');
-      addChronicle('Dawn of Power','Your presidency begins.','You have taken command. The world watches. History begins now.','green');
-      startLoop();
+    if (saved) {
+      setUsername(saved);
+      setScreen('game');
+      if (!gameStartedRef.current) {
+        gameStartedRef.current = true;
+        addEvt('Command channel open. The world awaits your move.', 'green');
+        addEvt('Intelligence reports incoming from 3 continents.', '');
+        addChronicle('Dawn of Power','Your presidency begins.','You have taken command. The world watches. History begins now.','green');
+        startLoop();
+      }
     }
+    // No redirect - show 'create' screen by default
   }, []);
 
   // Gov room chat
@@ -329,6 +330,22 @@ function GameContent() {
     });
   }
 
+  // Panel ref for native event capture - stops clicks from reaching globe
+  const panelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    const stop = (e: Event) => { e.stopPropagation(); };
+    panel.addEventListener('pointerdown', stop, true);
+    panel.addEventListener('mousedown', stop, true);
+    panel.addEventListener('touchstart', stop, true);
+    return () => {
+      panel.removeEventListener('pointerdown', stop, true);
+      panel.removeEventListener('mousedown', stop, true);
+      panel.removeEventListener('touchstart', stop, true);
+    };
+  }, [panelOpen]);
+
   // ── RENDER HELPERS ─────────────────────────────────────────────────────
   const loyaltyColor = (l: string) => l === 'loyal' ? C.green2 : l === 'suspicious' ? C.red2 : C.gold;
 
@@ -346,7 +363,58 @@ function GameContent() {
 
   // ── SCREENS ────────────────────────────────────────────────────────────
 
-  // CINEMATIC CRISIS
+  // CREATE PRESIDENT SCREEN
+  if (screen === 'create') return (
+    <div style={{width:'100vw',height:'100vh',background:C.bg,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',fontFamily:C.ff}}>
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse 60% 50% at 50% 40%,rgba(184,150,62,0.06) 0%,transparent 70%)',pointerEvents:'none'}}/>
+      <div style={{position:'absolute',inset:0,pointerEvents:'none',background:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.03) 3px,rgba(0,0,0,0.03) 4px)'}}/>
+      <div style={{position:'relative',zIndex:1,textAlign:'center',maxWidth:480,padding:'0 40px',width:'100%'}}>
+        <div style={{fontFamily:C.ffm,fontSize:9,letterSpacing:6,color:C.gold,textTransform:'uppercase' as const,marginBottom:16}}>Digital State · Character Creation</div>
+        <h1 style={{fontFamily:C.ff,fontSize:'clamp(28px,6vw,56px)',fontWeight:900,letterSpacing:4,color:'#fff',textTransform:'uppercase' as const,lineHeight:1,marginBottom:8}}>Create Your President</h1>
+        <div style={{fontFamily:C.ffm,fontSize:10,color:C.text3,letterSpacing:2,marginBottom:48}}>You will command nations. Choose your name carefully.</div>
+        <div style={{marginBottom:24}}>
+          <div style={{fontFamily:C.ffm,fontSize:8,letterSpacing:3,color:C.text2,marginBottom:8,textAlign:'left' as const}}>COMMANDER DESIGNATION</div>
+          <input
+            autoFocus
+            maxLength={20}
+            value={username}
+            onChange={e => setUsername(e.target.value.toUpperCase())}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && username.trim()) {
+                localStorage.setItem('digital_state_username', username.trim());
+                setScreen('game');
+                if (!gameStartedRef.current) {
+                  gameStartedRef.current = true;
+                  addEvt('Command channel open. The world awaits your move.', 'green');
+                  addEvt('Intelligence reports incoming from 3 continents.', '');
+                  addChronicle('Dawn of Power','Your presidency begins.','You have taken command. The world watches. History begins now.','green');
+                  startLoop();
+                }
+              }
+            }}
+            style={{width:'100%',padding:'14px 16px',fontFamily:C.ffm,fontSize:16,letterSpacing:4,color:C.gold2,background:'rgba(184,150,62,0.04)',border:`1px solid ${C.border}`,outline:'none',textAlign:'center' as const,boxSizing:'border-box' as const}}
+            placeholder="ENTER NAME"
+          />
+        </div>
+        <button
+          onClick={() => {
+            if (!username.trim()) return;
+            localStorage.setItem('digital_state_username', username.trim());
+            setScreen('game');
+            if (!gameStartedRef.current) {
+              gameStartedRef.current = true;
+              addEvt('Command channel open. The world awaits your move.', 'green');
+              addEvt('Intelligence reports incoming from 3 continents.', '');
+              addChronicle('Dawn of Power','Your presidency begins.','You have taken command. The world watches. History begins now.','green');
+              startLoop();
+            }
+          }}
+          style={{width:'100%',padding:'15px',fontFamily:C.ff,fontSize:12,fontWeight:700,letterSpacing:5,textTransform:'uppercase' as const,cursor:'pointer',border:`1px solid ${C.gold}`,color:C.gold2,background:'rgba(184,150,62,0.06)',transition:'all 0.2s'}}>
+          Assume Command →
+        </button>
+      </div>
+    </div>
+  );
   if (screen === 'cinematic' && activeCrisis) return (
     <div style={{position:'fixed',inset:0,background:'#000',zIndex:350,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',overflow:'hidden'}}>
       <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse 80% 60% at 50% 40%,rgba(192,57,43,0.07) 0%,transparent 70%)'}}/>
@@ -590,7 +658,7 @@ function GameContent() {
       </button>
 
       {/* Side panel */}
-      <div style={{position:'fixed',top:0,right:0,width:PANEL_W,height:'100%',background:'rgba(4,6,12,0.99)',borderLeft:`1px solid ${C.border2}`,zIndex:500,display:'flex',flexDirection:'column',transform: panelOpen ? 'translateX(0)' : 'translateX(100%)',transition:'transform 0.4s cubic-bezier(0.32,0.72,0,1)',isolation:'isolate',pointerEvents:'all'}}>
+      <div ref={panelRef} style={{position:'fixed',top:0,right:0,width:PANEL_W,height:'100%',background:'rgba(4,6,12,0.99)',borderLeft:`1px solid ${C.border2}`,zIndex:500,display:'flex',flexDirection:'column',transform: panelOpen ? 'translateX(0)' : 'translateX(100%)',transition:'transform 0.4s cubic-bezier(0.32,0.72,0,1)',isolation:'isolate',pointerEvents:'auto'}}>
         <div style={{display:'flex',borderBottom:`1px solid ${C.border2}`,flexShrink:0}}>
           <TabBtn id="ops" label="Ops"/>
           <TabBtn id="power" label="Power"/>
