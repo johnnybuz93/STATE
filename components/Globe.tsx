@@ -262,9 +262,9 @@ export default function GlobeCanvas({
         frameloop="always"
         style={{ width: "100%", height: "100%", display: "block", background: backgroundColor }}
         onCreated={({ gl, events }) => {
-          // Переключаем события R3F с document на сам canvas элемент
-          // Это главная причина почему кнопки не нажимались
-          events.connect(gl.domElement);
+          if (events?.connect) {
+            events.connect(gl.domElement);
+          }
           gl.domElement.style.pointerEvents = 'auto';
           if (gl.domElement.parentElement) {
             gl.domElement.parentElement.style.pointerEvents = 'none';
